@@ -1,0 +1,47 @@
+:py:mod:`pbspy.gadi`
+====================
+
+.. py:module:: pbspy.gadi
+
+.. autodoc2-docstring:: pbspy.gadi
+   :allowtitles:
+
+Module Contents
+---------------
+
+Functions
+~~~~~~~~~
+
+.. list-table::
+   :class: autosummary longtable
+   :align: left
+
+   * - :py:obj:`gadi_job <pbspy.gadi.gadi_job>`
+     - .. autodoc2-docstring:: pbspy.gadi.gadi_job
+          :summary:
+
+Data
+~~~~
+
+.. list-table::
+   :class: autosummary longtable
+   :align: left
+
+   * - :py:obj:`GadiQueue <pbspy.gadi.GadiQueue>`
+     - .. autodoc2-docstring:: pbspy.gadi.GadiQueue
+          :summary:
+
+API
+~~~
+
+.. py:data:: GadiQueue
+   :canonical: pbspy.gadi.GadiQueue
+   :type: typing.TypeAlias
+   :value: None
+
+   .. autodoc2-docstring:: pbspy.gadi.GadiQueue
+
+.. py:function:: gadi_job(nnodes: int, walltime: str, queue: pbspy.gadi.GadiQueue = 'normal', **kwargs: typing.Any) -> pbspy.JobDescription
+   :canonical: pbspy.gadi.gadi_job
+
+   .. autodoc2-docstring:: pbspy.gadi.gadi_job

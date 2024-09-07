@@ -1,0 +1,54 @@
+
+pbspy
+=====================================
+
+A python package for working with the Portable Batch System (PBS) job scheduler.
+
+.. autodoc2-summary::
+    pbspy
+    pbspy.gadi
+
+Usage
+-----
+
+Submitting a Job
+~~~~~~~~~~~~~~~~
+
+To submit a job to the PBS scheduler, create a :class:`~pbspy.JobDescription` and :py:meth:`~pbspy.JobDescription.submit()` it:
+
+.. code-block:: python
+
+    from pbspy import Job, JobDescription
+
+    job_description = (
+        JobDescription(
+            name="job_a", queue="normal", ncpus=48, mem="192GB", walltime="00:05:00"
+        )
+        .add_command(["echo", "A"])
+        .add_command(["echo", "B"])
+    )
+    job: Job = job_description.submit()
+    print(job.job_id)
+
+The :class:`~pbspy.Job` holds a ``job_id`` and other attributes.
+
+Retrieving Job Output
+~~~~~~~~~~~~~~~~~~~~~
+
+The output of a job can be retrieved by calling :py:meth:`~pbspy.Job.result()` on a :class:`~pbspy.Job`:
+
+.. code-block:: python
+
+    result: JobResult = job.result()
+    print(result.output)
+
+:py:meth:`~pbspy.Job.result()` waits for the job to complete before returning a :class:`~pbspy.JobResult`.
+This holds the ``stdout``, ``stderr``, ``exit_code``, and other information output by PBS.
+
+Wait for multiple jobs to complete with the :py:meth:`~pbspy.Job.result_all()` static method of :class:`~pbspy.Job`.
+
+API Documentation
+-----------------
+
+.. toctree::
+   apidocs/index

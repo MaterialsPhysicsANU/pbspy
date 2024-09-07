@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pbspy &#8212; pbspy  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=c058f7c8" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="apidocs/index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="pbspy">
+<h1>pbspy<a class="headerlink" href="#pbspy" title="Link to this heading">¶</a></h1>
+<p>A python package for working with the Portable Batch System (PBS) job scheduler.</p>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="apidocs/pbspy/pbspy.html#module-pbspy" title="pbspy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pbspy</span></code></a></p></td>
+<td><p>Utilities for PBS job submission and output retrieval.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="apidocs/pbspy/pbspy.gadi.html#module-pbspy.gadi" title="pbspy.gadi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pbspy.gadi</span></code></a></p></td>
+<td><p>Functionality specific to the Gadi supercomputer (Australia).</p></td>
+</tr>
+</tbody>
+</table>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
+<section id="submitting-a-job">
+<h3>Submitting a Job<a class="headerlink" href="#submitting-a-job" title="Link to this heading">¶</a></h3>
+<p>To submit a job to the PBS scheduler, create a <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription" title="pbspy.JobDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">JobDescription</span></code></a> and <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.submit" title="pbspy.JobDescription.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a> it:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pbspy</span> <span class="kn">import</span> <span class="n">Job</span><span class="p">,</span> <span class="n">JobDescription</span>
+
+<span class="n">job_description</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">JobDescription</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;job_a&quot;</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="s2">&quot;normal&quot;</span><span class="p">,</span> <span class="n">ncpus</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span> <span class="n">mem</span><span class="o">=</span><span class="s2">&quot;192GB&quot;</span><span class="p">,</span> <span class="n">walltime</span><span class="o">=</span><span class="s2">&quot;00:05:00&quot;</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">add_command</span><span class="p">([</span><span class="s2">&quot;echo&quot;</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">])</span>
+    <span class="o">.</span><span class="n">add_command</span><span class="p">([</span><span class="s2">&quot;echo&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">])</span>
+<span class="p">)</span>
+<span class="n">job</span><span class="p">:</span> <span class="n">Job</span> <span class="o">=</span> <span class="n">job_description</span><span class="o">.</span><span class="n">submit</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">job_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job" title="pbspy.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a> holds a <code class="docutils literal notranslate"><span class="pre">job_id</span></code> and other attributes.</p>
+</section>
+<section id="retrieving-job-output">
+<h3>Retrieving Job Output<a class="headerlink" href="#retrieving-job-output" title="Link to this heading">¶</a></h3>
+<p>The output of a job can be retrieved by calling <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.result" title="pbspy.Job.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> on a <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job" title="pbspy.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="p">:</span> <span class="n">JobResult</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.result" title="pbspy.Job.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> waits for the job to complete before returning a <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobResult" title="pbspy.JobResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">JobResult</span></code></a>.
+This holds the <code class="docutils literal notranslate"><span class="pre">stdout</span></code>, <code class="docutils literal notranslate"><span class="pre">stderr</span></code>, <code class="docutils literal notranslate"><span class="pre">exit_code</span></code>, and other information output by PBS.</p>
+<p>Wait for multiple jobs to complete with the <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.result_all" title="pbspy.Job.result_all"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result_all()</span></code></a> static method of <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job" title="pbspy.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a>.</p>
+</section>
+</section>
+<section id="api-documentation">
+<h2>API Documentation<a class="headerlink" href="#api-documentation" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="apidocs/index.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="apidocs/pbspy/pbspy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pbspy</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apidocs/pbspy/pbspy.html#submodules">Submodules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apidocs/pbspy/pbspy.gadi.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pbspy.gadi</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="apidocs/pbspy/pbspy.gadi.html#module-contents">Module Contents</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.gadi.html#functions">Functions</a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.gadi.html#data">Data</a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.gadi.html#api">API</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="apidocs/pbspy/pbspy.gadi.html#pbspy.gadi.GadiQueue"><code class="docutils literal notranslate"><span class="pre">GadiQueue</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="apidocs/pbspy/pbspy.gadi.html#pbspy.gadi.gadi_job"><code class="docutils literal notranslate"><span class="pre">gadi_job()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="apidocs/pbspy/pbspy.html#package-contents">Package Contents</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apidocs/pbspy/pbspy.html#classes">Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apidocs/pbspy/pbspy.html#api">API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job"><code class="docutils literal notranslate"><span class="pre">Job</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.job_name"><code class="docutils literal notranslate"><span class="pre">Job.job_name</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.description"><code class="docutils literal notranslate"><span class="pre">Job.description</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.job_id"><code class="docutils literal notranslate"><span class="pre">Job.job_id</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.identifier"><code class="docutils literal notranslate"><span class="pre">Job.identifier()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.wait"><code class="docutils literal notranslate"><span class="pre">Job.wait()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.wait_all"><code class="docutils literal notranslate"><span class="pre">Job.wait_all()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.result_all"><code class="docutils literal notranslate"><span class="pre">Job.result_all()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.result_no_wait"><code class="docutils literal notranslate"><span class="pre">Job.result_no_wait()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.result"><code class="docutils literal notranslate"><span class="pre">Job.result()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription"><code class="docutils literal notranslate"><span class="pre">JobDescription</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.name"><code class="docutils literal notranslate"><span class="pre">JobDescription.name</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.description"><code class="docutils literal notranslate"><span class="pre">JobDescription.description</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.commands"><code class="docutils literal notranslate"><span class="pre">JobDescription.commands</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.queue"><code class="docutils literal notranslate"><span class="pre">JobDescription.queue</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.ncpus"><code class="docutils literal notranslate"><span class="pre">JobDescription.ncpus</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.mem"><code class="docutils literal notranslate"><span class="pre">JobDescription.mem</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.jobfs"><code class="docutils literal notranslate"><span class="pre">JobDescription.jobfs</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.walltime"><code class="docutils literal notranslate"><span class="pre">JobDescription.walltime</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.storage"><code class="docutils literal notranslate"><span class="pre">JobDescription.storage</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.wd"><code class="docutils literal notranslate"><span class="pre">JobDescription.wd</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.wait"><code class="docutils literal notranslate"><span class="pre">JobDescription.wait</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.add_command"><code class="docutils literal notranslate"><span class="pre">JobDescription.add_command()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.script"><code class="docutils literal notranslate"><span class="pre">JobDescription.script()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.submit"><code class="docutils literal notranslate"><span class="pre">JobDescription.submit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobResult"><code class="docutils literal notranslate"><span class="pre">JobResult</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobResult.exit_code"><code class="docutils literal notranslate"><span class="pre">JobResult.exit_code</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobResult.output"><code class="docutils literal notranslate"><span class="pre">JobResult.output</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobResult.error"><code class="docutils literal notranslate"><span class="pre">JobResult.error</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobResult.pbs_stats"><code class="docutils literal notranslate"><span class="pre">JobResult.pbs_stats</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">pbspy</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="apidocs/index.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="apidocs/index.html" title="next chapter">API Reference</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.0.2</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
