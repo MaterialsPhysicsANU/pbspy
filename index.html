@@ -34,6 +34,13 @@
             
   <section id="pbspy">
 <h1>pbspy<a class="headerlink" href="#pbspy" title="Link to this heading">¶</a></h1>
+<img alt="PyPI - Version" src="https://img.shields.io/pypi/v/pbspy" />
+<a class="reference external image-reference" href="https://MaterialsPhysicsANU.github.io/pbspy/"><img alt="docs" src="https://img.shields.io/pypi/v/pbspy?label=docs&amp;color=blue&amp;link=https%3A%2F%2FMaterialsPhysicsANU.github.io%2Fpbspy%2F" />
+</a>
+<img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/pbspy" />
+<img alt="PyPI - License" src="https://img.shields.io/pypi/l/pbspy" />
+<a class="reference external image-reference" href="https://github.com/MaterialsPhysicsANU/pbspy/actions/workflows/main.yml"><img alt="build" src="https://github.com/MaterialsPhysicsANU/pbspy/actions/workflows/main.yml/badge.svg" />
+</a>
 <p>A python package for working with the Portable Batch System (PBS) job scheduler.</p>
 <table class="autosummary longtable docutils align-left">
 <tbody>
@@ -54,7 +61,12 @@
 
 <span class="n">job_description</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">JobDescription</span><span class="p">(</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;job_a&quot;</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="s2">&quot;normal&quot;</span><span class="p">,</span> <span class="n">ncpus</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mem</span><span class="o">=</span><span class="s2">&quot;100MB&quot;</span><span class="p">,</span> <span class="n">walltime</span><span class="o">=</span><span class="s2">&quot;00:05:00&quot;</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;job_tiny&quot;</span><span class="p">,</span>
+        <span class="n">queue</span><span class="o">=</span><span class="s2">&quot;normal&quot;</span><span class="p">,</span>
+        <span class="n">ncpus</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">mem</span><span class="o">=</span><span class="s2">&quot;100MB&quot;</span><span class="p">,</span>
+        <span class="n">jobfs</span><span class="o">=</span><span class="s2">&quot;0MB&quot;</span><span class="p">,</span>
+        <span class="n">walltime</span><span class="o">=</span><span class="s2">&quot;00:05:00&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="o">.</span><span class="n">add_command</span><span class="p">([</span><span class="s2">&quot;echo&quot;</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">])</span>
     <span class="o">.</span><span class="n">add_command</span><span class="p">([</span><span class="s2">&quot;echo&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">])</span>
@@ -65,7 +77,7 @@
 </div>
 <p>The <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job" title="pbspy.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a> holds a <code class="docutils literal notranslate"><span class="pre">job_id</span></code> and other attributes.</p>
 <p>The <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.from_nodes" title="pbspy.JobDescription.from_nodes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_nodes()</span></code></a> constructor of <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription" title="pbspy.JobDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">JobDescription</span></code></a> creates a job description that uses all available resources for some number of nodes.
-Resource limits for a queue must be provided in a <code class="xref py py-class docutils literal notranslate"><span class="pre">QueueLimits</span></code>.</p>
+Resource limits for a queue must be provided in a <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.QueueLimits" title="pbspy.QueueLimits"><code class="xref py py-class docutils literal notranslate"><span class="pre">QueueLimits</span></code></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pbspy</span> <span class="kn">import</span> <span class="n">Job</span><span class="p">,</span> <span class="n">JobDescription</span>
 
 <span class="n">queue_limits</span> <span class="o">=</span> <span class="n">QueueLimits</span><span class="p">(</span>
@@ -73,19 +85,19 @@ Resource limits for a queue must be provided in a <code class="xref py py-class 
 <span class="p">)</span>
 <span class="n">job_description</span> <span class="o">=</span> <span class="n">JobDescription</span><span class="o">.</span><span class="n">from_nodes</span><span class="p">(</span>
     <span class="n">nnodes</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;job_a&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;job_1node&quot;</span><span class="p">,</span>
     <span class="n">queue</span><span class="o">=</span><span class="s2">&quot;normal&quot;</span><span class="p">,</span>
     <span class="n">queue_limits</span><span class="o">=</span><span class="n">queue_limits</span><span class="p">,</span>
     <span class="n">walltime</span><span class="o">=</span><span class="s2">&quot;00:05:00&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p><a class="reference internal" href="apidocs/pbspy/pbspy.html#module-pbspy" title="pbspy"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pbspy</span></code></a> does not currently support querying the <code class="xref py py-class docutils literal notranslate"><span class="pre">QueueLimits</span></code> of a PBS queue.
+<p><a class="reference internal" href="apidocs/pbspy/pbspy.html#module-pbspy" title="pbspy"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pbspy</span></code></a> does not currently support querying the <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.QueueLimits" title="pbspy.QueueLimits"><code class="xref py py-class docutils literal notranslate"><span class="pre">QueueLimits</span></code></a> of a PBS queue.
 Note that some PBS systems do not make such information queryable anyway.</p>
-<p>The <a class="reference internal" href="apidocs/pbspy/pbspy.gadi.html#module-pbspy.gadi" title="pbspy.gadi"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pbspy.gadi</span></code></a> submodule has pre-defined <code class="xref py py-class docutils literal notranslate"><span class="pre">QueueLimits</span></code> for the Gadi supercomputer.</p>
+<p>The <a class="reference internal" href="apidocs/pbspy/pbspy.gadi.html#module-pbspy.gadi" title="pbspy.gadi"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pbspy.gadi</span></code></a> submodule has pre-defined <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.QueueLimits" title="pbspy.QueueLimits"><code class="xref py py-class docutils literal notranslate"><span class="pre">QueueLimits</span></code></a> for the Gadi supercomputer.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Contributions are welcomed for <code class="xref py py-class docutils literal notranslate"><span class="pre">QueueLimits</span></code> for other clusters.</p>
+<p>Contributions are welcomed for <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.QueueLimits" title="pbspy.QueueLimits"><code class="xref py py-class docutils literal notranslate"><span class="pre">QueueLimits</span></code></a> for other clusters.</p>
 </div>
 </section>
 <section id="retrieving-job-output">
@@ -98,6 +110,11 @@ Note that some PBS systems do not make such information queryable anyway.</p>
 <p><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.result" title="pbspy.Job.result"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result()</span></code></a> waits for the job to complete before returning a <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobResult" title="pbspy.JobResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">JobResult</span></code></a> that holds the <code class="docutils literal notranslate"><span class="pre">stdout</span></code>, <code class="docutils literal notranslate"><span class="pre">stderr</span></code>, <code class="docutils literal notranslate"><span class="pre">exit_code</span></code>, and other information output by PBS.</p>
 <p>Wait for multiple jobs to complete with the <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.result_all" title="pbspy.Job.result_all"><code class="xref py py-meth docutils literal notranslate"><span class="pre">result_all()</span></code></a> static method of <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job" title="pbspy.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a>.</p>
 </section>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">pbspy</span></code> is licensed under the Apache License &lt;<a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>&gt;.</p>
+<p>Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.</p>
 </section>
 <section id="api-documentation">
 <h2>API Documentation<a class="headerlink" href="#api-documentation" title="Link to this heading">¶</a></h2>
@@ -121,18 +138,8 @@ Note that some PBS systems do not make such information queryable anyway.</p>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="apidocs/pbspy/pbspy.html#package-contents">Package Contents</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="apidocs/pbspy/pbspy.html#classes">Classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apidocs/pbspy/pbspy.html#data">Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="apidocs/pbspy/pbspy.html#api">API</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job"><code class="docutils literal notranslate"><span class="pre">Job</span></code></a><ul>
-<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.job_name"><code class="docutils literal notranslate"><span class="pre">Job.job_name</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.description"><code class="docutils literal notranslate"><span class="pre">Job.description</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.job_id"><code class="docutils literal notranslate"><span class="pre">Job.job_id</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.wait"><code class="docutils literal notranslate"><span class="pre">Job.wait()</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.wait_all"><code class="docutils literal notranslate"><span class="pre">Job.wait_all()</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.result_all"><code class="docutils literal notranslate"><span class="pre">Job.result_all()</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.result_no_wait"><code class="docutils literal notranslate"><span class="pre">Job.result_no_wait()</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.result"><code class="docutils literal notranslate"><span class="pre">Job.result()</span></code></a></li>
-</ul>
-</li>
 <li class="toctree-l5"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription"><code class="docutils literal notranslate"><span class="pre">JobDescription</span></code></a><ul>
 <li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.name"><code class="docutils literal notranslate"><span class="pre">JobDescription.name</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.description"><code class="docutils literal notranslate"><span class="pre">JobDescription.description</span></code></a></li>
@@ -144,20 +151,38 @@ Note that some PBS systems do not make such information queryable anyway.</p>
 <li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.walltime"><code class="docutils literal notranslate"><span class="pre">JobDescription.walltime</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.storage"><code class="docutils literal notranslate"><span class="pre">JobDescription.storage</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.wd"><code class="docutils literal notranslate"><span class="pre">JobDescription.wd</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.wait"><code class="docutils literal notranslate"><span class="pre">JobDescription.wait</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.afterok"><code class="docutils literal notranslate"><span class="pre">JobDescription.afterok</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.from_nodes"><code class="docutils literal notranslate"><span class="pre">JobDescription.from_nodes()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.add_command"><code class="docutils literal notranslate"><span class="pre">JobDescription.add_command()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.script"><code class="docutils literal notranslate"><span class="pre">JobDescription.script()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.submit"><code class="docutils literal notranslate"><span class="pre">JobDescription.submit()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job"><code class="docutils literal notranslate"><span class="pre">Job</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.job_name"><code class="docutils literal notranslate"><span class="pre">Job.job_name</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.job_id"><code class="docutils literal notranslate"><span class="pre">Job.job_id</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.description"><code class="docutils literal notranslate"><span class="pre">Job.description</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.wait"><code class="docutils literal notranslate"><span class="pre">Job.wait()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job._result_no_wait"><code class="docutils literal notranslate"><span class="pre">Job._result_no_wait()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.result"><code class="docutils literal notranslate"><span class="pre">Job.result()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.wait_all"><code class="docutils literal notranslate"><span class="pre">Job.wait_all()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job.result_all"><code class="docutils literal notranslate"><span class="pre">Job.result_all()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobResult"><code class="docutils literal notranslate"><span class="pre">JobResult</span></code></a><ul>
 <li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobResult.exit_code"><code class="docutils literal notranslate"><span class="pre">JobResult.exit_code</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobResult.output"><code class="docutils literal notranslate"><span class="pre">JobResult.output</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobResult.error"><code class="docutils literal notranslate"><span class="pre">JobResult.error</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobResult.pbs_stats"><code class="docutils literal notranslate"><span class="pre">JobResult.pbs_stats</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobResult.stats"><code class="docutils literal notranslate"><span class="pre">JobResult.stats</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.QueueLimits"><code class="docutils literal notranslate"><span class="pre">QueueLimits</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.QueueLimits.cpus_per_node"><code class="docutils literal notranslate"><span class="pre">QueueLimits.cpus_per_node</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.QueueLimits.max_mem_per_node"><code class="docutils literal notranslate"><span class="pre">QueueLimits.max_mem_per_node</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.QueueLimits.max_jobfs_per_node"><code class="docutils literal notranslate"><span class="pre">QueueLimits.max_jobfs_per_node</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.QueueLimitsMap"><code class="docutils literal notranslate"><span class="pre">QueueLimitsMap</span></code></a></li>
 </ul>
 </li>
 </ul>
