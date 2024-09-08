@@ -2,7 +2,7 @@
 
 ![PyPI - Version](https://img.shields.io/pypi/v/pbspy)
 ![docs](https://img.shields.io/pypi/v/pbspy?label=docs&color=blue&link=https%3A%2F%2FMaterialsPhysicsANU.github.io%2Fpbspy%2F)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pbspy)
+![Python Version](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2FMaterialsPhysicsANU%2Fpbspy%2Fmain%2Fpyproject.toml)
 ![PyPI - License](https://img.shields.io/pypi/l/pbspy)
 [![build](https://github.com/MaterialsPhysicsANU/pbspy/actions/workflows/main.yml/badge.svg)](https://github.com/MaterialsPhysicsANU/pbspy/actions/workflows/main.yml)
 

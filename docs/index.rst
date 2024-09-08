@@ -9,8 +9,8 @@ pbspy
    :alt: docs
    :target: https://MaterialsPhysicsANU.github.io/pbspy/
 
-.. image:: https://img.shields.io/pypi/pyversions/pbspy
-   :alt: PyPI - Python Version
+.. image:: https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2FMaterialsPhysicsANU%2Fpbspy%2Fmain%2Fpyproject.toml
+   :alt: Python Version
 
 .. image:: https://img.shields.io/pypi/l/pbspy
    :alt: PyPI - License
