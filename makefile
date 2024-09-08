@@ -5,18 +5,21 @@ version:
 	hatch version
 
 docs:
+	rm -r docs/build || true
 	hatch -e dev run sphinx-build docs/ docs/build/
 
 example:
 	hatch run python examples/run.py
 
 build:
+	rm -r dist || true
 	hatch build
 
 clean:
 	hatch env prune
 
 publish:
+	rm -r dist || true
 	hatch build
 	hatch publish
 

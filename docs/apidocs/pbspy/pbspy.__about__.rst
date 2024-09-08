@@ -25,6 +25,6 @@ API
 
 .. py:data:: __version__
    :canonical: pbspy.__about__.__version__
-   :value: '0.0.1'
+   :value: '0.0.2'
 
    .. autodoc2-docstring:: pbspy.__about__.__version__
