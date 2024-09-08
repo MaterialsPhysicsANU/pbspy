@@ -65,7 +65,7 @@
 </div>
 <p>The <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.Job" title="pbspy.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a> holds a <code class="docutils literal notranslate"><span class="pre">job_id</span></code> and other attributes.</p>
 <p>The <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription.from_nodes" title="pbspy.JobDescription.from_nodes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_nodes()</span></code></a> constructor of <a class="reference internal" href="apidocs/pbspy/pbspy.html#pbspy.JobDescription" title="pbspy.JobDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">JobDescription</span></code></a> creates a job description that uses all available resources for some number of nodes.
-Resource limits for a node must be provided in a <code class="xref py py-class docutils literal notranslate"><span class="pre">QueueLimits</span></code>.</p>
+Resource limits for a queue must be provided in a <code class="xref py py-class docutils literal notranslate"><span class="pre">QueueLimits</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pbspy</span> <span class="kn">import</span> <span class="n">Job</span><span class="p">,</span> <span class="n">JobDescription</span>
 
 <span class="n">queue_limits</span> <span class="o">=</span> <span class="n">QueueLimits</span><span class="p">(</span>

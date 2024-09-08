@@ -33,7 +33,7 @@ To submit a job to the PBS scheduler, create a :py:class:`~pbspy.JobDescription`
 The :class:`~pbspy.Job` holds a ``job_id`` and other attributes.
 
 The :py:meth:`~pbspy.JobDescription.from_nodes()` constructor of :py:class:`~pbspy.JobDescription` creates a job description that uses all available resources for some number of nodes.
-Resource limits for a node must be provided in a :class:`~pbspy.QueueLimits`.
+Resource limits for a queue must be provided in a :class:`~pbspy.QueueLimits`.
 
 .. code-block:: python
 
