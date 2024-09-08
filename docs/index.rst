@@ -98,9 +98,7 @@ Wait for multiple jobs to complete with the :py:meth:`~pbspy.Job.result_all()` s
 License
 -----------------
 
-``pbspy`` is licensed under the Apache License <http://www.apache.org/licenses/LICENSE-2.0>.
-
-Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
+``pbspy`` is licensed under the MIT License <http://opensource.org/licenses/MIT>.
 
 
 API Documentation

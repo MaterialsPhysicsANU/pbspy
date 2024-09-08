@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add `str` support to `JobDescription.add_command()`
 
+### Changed
+
+- Switch to the MIT license from the Apache Software License, Version 2.0
+- Use Python version badge from `pyproject.toml`
+
 ### Fixed
 
 - Fix `pyproject.toml` project description to match README/docs
