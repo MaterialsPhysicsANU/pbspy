@@ -34,24 +34,14 @@
             
   <section id="module-pbspy.gadi">
 <span id="pbspy-gadi"></span><h1><a class="reference internal" href="#module-pbspy.gadi" title="pbspy.gadi"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pbspy.gadi</span></code></a><a class="headerlink" href="#module-pbspy.gadi" title="Link to this heading">¶</a></h1>
-<p>Functionality specific to the Gadi supercomputer (Australia).</p>
+<p>Queue resource limits for the Gadi supercomputer (Australia).</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
-<section id="functions">
-<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h3>
-<table class="autosummary longtable docutils align-left">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pbspy.gadi.gadi_job" title="pbspy.gadi.gadi_job"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gadi_job</span></code></a></p></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-</section>
 <section id="data">
 <h3>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h3>
 <table class="autosummary longtable docutils align-left">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pbspy.gadi.GadiQueue" title="pbspy.gadi.GadiQueue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GadiQueue</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pbspy.gadi.gadi_queue_limits" title="pbspy.gadi.gadi_queue_limits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gadi_queue_limits</span></code></a></p></td>
 <td></td>
 </tr>
 </tbody>
@@ -60,13 +50,8 @@
 <section id="api">
 <h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
 <dl class="py data">
-<dt class="sig sig-object py" id="pbspy.gadi.GadiQueue">
-<span class="sig-prename descclassname"><span class="pre">pbspy.gadi.</span></span><span class="sig-name descname"><span class="pre">GadiQueue</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">TypeAlias</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.gadi.GadiQueue" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pbspy.gadi.gadi_job">
-<span class="sig-prename descclassname"><span class="pre">pbspy.gadi.</span></span><span class="sig-name descname"><span class="pre">gadi_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nnodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">walltime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pbspy.gadi.GadiQueue</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'normal'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pbspy.html#pbspy.JobDescription" title="pbspy.JobDescription"><span class="pre">pbspy.JobDescription</span></a></span></span><a class="headerlink" href="#pbspy.gadi.gadi_job" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pbspy.gadi.gadi_queue_limits">
+<span class="sig-prename descclassname"><span class="pre">pbspy.gadi.</span></span><span class="sig-name descname"><span class="pre">gadi_queue_limits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pbspy.QueueLimitsMap</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.gadi.gadi_queue_limits" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </section>
@@ -105,11 +90,9 @@
 <li class="toctree-l3 current"><a class="reference internal" href="pbspy.html#submodules">Submodules</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pbspy.gadi</span></code></a><ul>
 <li class="toctree-l5"><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="#functions">Functions</a></li>
 <li class="toctree-l6"><a class="reference internal" href="#data">Data</a></li>
 <li class="toctree-l6"><a class="reference internal" href="#api">API</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="#pbspy.gadi.GadiQueue"><code class="docutils literal notranslate"><span class="pre">GadiQueue</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="#pbspy.gadi.gadi_job"><code class="docutils literal notranslate"><span class="pre">gadi_job()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#pbspy.gadi.gadi_queue_limits"><code class="docutils literal notranslate"><span class="pre">gadi_queue_limits</span></code></a></li>
 </ul>
 </li>
 </ul>

@@ -64,11 +64,6 @@ API
 
       .. autodoc2-docstring:: pbspy.Job.job_id
 
-   .. py:method:: identifier() -> str
-      :canonical: pbspy.Job.identifier
-
-      .. autodoc2-docstring:: pbspy.Job.identifier
-
    .. py:method:: wait() -> None
       :canonical: pbspy.Job.wait
 
@@ -177,6 +172,12 @@ API
       :value: 'field(...)'
 
       .. autodoc2-docstring:: pbspy.JobDescription.wait
+
+   .. py:method:: from_nodes(nnodes: int, queue: str, queue_limits: pbspy.QueueLimits, **kwargs: typing.Any) -> pbspy.JobDescription
+      :canonical: pbspy.JobDescription.from_nodes
+      :classmethod:
+
+      .. autodoc2-docstring:: pbspy.JobDescription.from_nodes
 
    .. py:method:: add_command(command: list[str]) -> typing.Self
       :canonical: pbspy.JobDescription.add_command
