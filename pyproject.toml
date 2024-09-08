@@ -4,7 +4,7 @@ dynamic = ["version"]
 authors = [
   { name="Lachlan Deakin", email="ljdgit@gmail.com" },
 ]
-description = "A python package for working with the ANU PBS queue submission system"
+description = "A python package for working with the Portable Batch System (PBS) job scheduler."
 readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
