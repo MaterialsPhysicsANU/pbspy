@@ -73,7 +73,7 @@ API
 
    .. py:attribute:: commands
       :canonical: pbspy.JobDescription.commands
-      :type: list[list[str]]
+      :type: list[str | list[str]]
       :value: 'field(...)'
 
       .. autodoc2-docstring:: pbspy.JobDescription.commands
@@ -140,7 +140,7 @@ API
 
       .. autodoc2-docstring:: pbspy.JobDescription.from_nodes
 
-   .. py:method:: add_command(command: list[str]) -> typing.Self
+   .. py:method:: add_command(command: str | list[str]) -> typing.Self
       :canonical: pbspy.JobDescription.add_command
 
       .. autodoc2-docstring:: pbspy.JobDescription.add_command
