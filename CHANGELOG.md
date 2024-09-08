@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.3] - 2024-09-08
+
 ### Added
 
 - Add links to pypi and docs in README
+
+### Fixed
+
+- Handle missing output/error file
 
 ## [0.0.2] - 2024-09-08
 
@@ -33,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
-[unreleased]: https://github.com/MaterialsPhysicsANU/pbspy/compare/v0.0.2...HEAD
+[unreleased]: https://github.com/MaterialsPhysicsANU/pbspy/compare/v0.0.3...HEAD
+[0.0.3]: https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.3
 [0.0.2]: https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.2
 [0.0.1]: https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.1
