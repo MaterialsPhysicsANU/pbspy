@@ -4,6 +4,7 @@ pbspy
 
 .. image:: https://img.shields.io/pypi/v/pbspy
    :alt: PyPI - Version
+   :target: https://pypi.org/project/pbspy/
 
 .. image:: https://img.shields.io/pypi/v/pbspy?label=docs&color=blue&link=https%3A%2F%2FMaterialsPhysicsANU.github.io%2Fpbspy%2F
    :alt: docs
