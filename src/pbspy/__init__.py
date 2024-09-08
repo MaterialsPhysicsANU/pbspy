@@ -167,10 +167,16 @@ class Job:
         job_id_num = self.job_id.split(".")[0]  # Remove .gadi-pbspy suffix
         output_file = f"{self.job_name}.o{job_id_num}"
         error_file = f"{self.job_name}.e{job_id_num}"
-        with open(output_file) as f:
-            output = f.read()
-        with open(error_file) as f:
-            error = f.read()
+        try:
+            with open(output_file) as f:
+                output = f.read()
+        except FileNotFoundError:
+            output = ""
+        try:
+            with open(error_file) as f:
+                error = f.read()
+        except FileNotFoundError:
+            error = ""
 
         # Try and process the output
         output_split = output.split(
