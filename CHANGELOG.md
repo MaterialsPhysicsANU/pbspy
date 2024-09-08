@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `str` support to `JobDescription.add_command()`
+
 ## [0.0.1] - 2024-09-08
 
 ### Added

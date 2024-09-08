@@ -256,7 +256,7 @@ class JobDescription:
     description: str | None = None
     """A description of the job for progress updates. Unused by PBS."""
 
-    commands: list[list[str]] = field(default_factory=list)
+    commands: list[str | list[str]] = field(default_factory=list)
     """A list of commands to be executed in the job."""
 
     queue: str | None = None
@@ -296,7 +296,7 @@ class JobDescription:
             kwargs["jobfs"] = f"{queue_limits.max_jobfs_per_node}GB"
         return cls(queue=queue, **kwargs)
 
-    def add_command(self, command: list[str]) -> Self:
+    def add_command(self, command: str | list[str]) -> Self:
         """
         Adds a command to the list of commands for the job.
         """
@@ -307,7 +307,14 @@ class JobDescription:
         """
         Generate a PBS job script based on job description.
         """
-        commands = "\n".join([" ".join(shlex.quote(arg) for arg in args) for args in self.commands])
+        commands: list[str] = []
+        for command in self.commands:
+            if isinstance(command, str):
+                commands.append(command)
+            elif isinstance(command, list):
+                commands.append(" ".join(shlex.quote(arg) for arg in command))
+        commands_str = "\n".join(commands)
+
         job_script = f"""#!/bin/bash
 {f"#PBS -N {self.name}" if self.name else ""}
 {f"#PBS -q {self.queue}" if self.queue else ""}
@@ -318,7 +325,7 @@ class JobDescription:
 {f"#PBS -l storage={self.storage}" if self.storage else ""}
 {"#PBS -l wd" if self.wd else ""}
 {f'#PBS -W depend=afterok:{":".join([job.job_id for job in self.afterok])}' if len(self.afterok) > 0 else ""}
-{commands}
+{commands_str}
 """
         return job_script
 
