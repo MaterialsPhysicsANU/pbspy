@@ -1,0 +1,76 @@
+[project]
+name = "pbspy"
+dynamic = ["version"]
+authors = [
+  { name="Lachlan Deakin", email="ljdgit@gmail.com" },
+]
+description = "A python package for working with the ANU PBS queue submission system"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: System :: Distributed Computing",
+]
+dependencies = [
+  "rich~=13.8",
+  "typer~=0.12.5",
+]
+
+[project.optional-dependencies]
+test = [
+    "pre-commit",
+    "pytest",
+    "mypy",
+    "ruff",
+    "sphinx",
+    "sphinx-autodoc2",
+]
+
+[tool.hatch.version]
+path = "src/pbspy/__about__.py"
+
+[tool.hatch.envs.dev]
+dependencies = [
+    "pbspy[test]",
+]
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.11", "3.12"]
+
+[project.urls]
+Homepage = "https://github.com/MaterialsPhysicsANU/pbspy"
+Issues = "https://github.com/MaterialsPhysicsANU/pbspy/issues"
+Changelog = "https://github.com/MaterialsPhysicsANU/pbspy/blob/main/README.md"
+Documentation = "https://MaterialsPhysicsANU.github.io/pbspy/"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+src = ["src"]
+line-length = 120
+lint.extend-select = [
+  "B",  # flake8-bugbear
+  "I",  # isort
+  "UP",  # pyupgrade
+]
+
+[tool.mypy]
+strict = true
+warn_unreachable = true
+enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = ["error"]
+log_cli_level = "info"
+testpaths = [
+  "tests",
+]
