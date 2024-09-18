@@ -309,6 +309,14 @@ class JobDescription:
         self.commands.append(command)
         return self
 
+    def add_commands(self, commands: list[str | list[str]]) -> Self:
+        """
+        Adds a list of commands to the job.
+        """
+        for command in commands:
+            self.add_command(command)
+        return self
+
     def script(self) -> str:
         """
         Generate a PBS job script based on job description.
