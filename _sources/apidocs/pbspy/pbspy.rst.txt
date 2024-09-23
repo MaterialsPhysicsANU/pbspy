@@ -145,6 +145,11 @@ API
 
       .. autodoc2-docstring:: pbspy.JobDescription.add_command
 
+   .. py:method:: add_commands(commands: list[str | list[str]]) -> typing.Self
+      :canonical: pbspy.JobDescription.add_commands
+
+      .. autodoc2-docstring:: pbspy.JobDescription.add_commands
+
    .. py:method:: script() -> str
       :canonical: pbspy.JobDescription.script
 
