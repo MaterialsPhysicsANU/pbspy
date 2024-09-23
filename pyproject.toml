@@ -47,7 +47,7 @@ python = ["3.11", "3.12"]
 [project.urls]
 Homepage = "https://github.com/MaterialsPhysicsANU/pbspy"
 Issues = "https://github.com/MaterialsPhysicsANU/pbspy/issues"
-Changelog = "https://github.com/MaterialsPhysicsANU/pbspy/blob/main/README.md"
+Changelog = "https://github.com/MaterialsPhysicsANU/pbspy/blob/main/CHANGELOG.md"
 Documentation = "https://MaterialsPhysicsANU.github.io/pbspy/"
 
 [build-system]

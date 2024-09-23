@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix `CHANGELOG.md` URL in package metadata
+
 ## [0.0.4] - 2024-09-24
 
 ### Added
