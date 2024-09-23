@@ -299,7 +299,7 @@ class JobDescription:
         if "mem" not in kwargs:
             kwargs["mem"] = f"{nnodes * queue_limits.max_mem_per_node}GB"
         if "jobfs" not in kwargs:
-            kwargs["jobfs"] = f"{queue_limits.max_jobfs_per_node}GB"
+            kwargs["jobfs"] = f"{nnodes * queue_limits.max_jobfs_per_node}GB"
         return cls(queue=queue, **kwargs)
 
     def add_command(self, command: str | list[str]) -> Self:

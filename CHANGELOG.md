@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add `JobDescription.add_commands()`
 
+### Fixed
+
+- Fix `JobDescription.from_nodes()` not scaling `jobfs` with the number of nodes
+
 ## [0.0.3] - 2024-09-08
 
 ### Added
