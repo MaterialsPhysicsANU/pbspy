@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.5] - 2024-09-24
+
 ### Changed
 
 - Change refresh rate to 1Hz in `_pbs_wait_for_jobs` and remove progress spinner
@@ -57,7 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
-[unreleased]: https://github.com/MaterialsPhysicsANU/pbspy/compare/v0.0.4...HEAD
+[unreleased]: https://github.com/MaterialsPhysicsANU/pbspy/compare/v0.0.5...HEAD
+[0.0.5]: https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.5
 [0.0.4]: https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.4
 [0.0.3]: https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.3
 [0.0.2]: https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.2
