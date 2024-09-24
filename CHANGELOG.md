@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Change refresh rate to 1Hz in `_pbs_wait_for_jobs` and remove progress spinner
+
 ### Fixed
 
 - Fix `CHANGELOG.md` URL in package metadata

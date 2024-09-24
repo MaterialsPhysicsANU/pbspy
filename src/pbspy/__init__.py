@@ -11,7 +11,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Self, TypeAlias
 
-from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
+from rich.progress import Progress, TextColumn, TimeElapsedColumn
 
 __all__ = ["JobDescription", "Job", "JobResult", "QueueLimits", "QueueLimitsMap", "gadi"]
 
@@ -78,14 +78,14 @@ def _pbs_wait_for_jobs(jobs: list[Job]) -> None:
     """
     last_check = time.time()
     with Progress(
-        SpinnerColumn(),
         TimeElapsedColumn(),
         TextColumn("[progress.description]{task.description}"),
+        auto_refresh=False,
     ) as progress:
         tasks = [progress.add_task(f"{job.job_id} {job.job_name} {job.description or ''}", total=1) for job in jobs]
         task_done = [False] * len(jobs)
         while not all(task_done):
-            progress.refresh()
+            time.sleep(1)
             if time.time() - last_check > 60:
                 last_check = time.time()
                 for i, (job, task) in enumerate(zip(jobs, tasks, strict=False)):
@@ -113,6 +113,7 @@ def _pbs_wait_for_jobs(jobs: list[Job]) -> None:
                             )
                     # else:
                     # raise RuntimeError(f"Failed to check job status: {process.stderr.decode('utf-8')}")
+            progress.refresh()
 
 
 @dataclass

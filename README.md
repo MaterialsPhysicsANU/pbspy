@@ -42,7 +42,7 @@ Output (partially executed):
 
 ```text
 ✓ 124397435.gadi-pbs job_a
-⠼ 0:01:15 124397436.gadi-pbs job_b
+0:01:15 124397436.gadi-pbs job_b
 ```
 
 Output (completed):
