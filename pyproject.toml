@@ -36,8 +36,8 @@ test = [
 [tool.hatch.version]
 path = "src/pbspy/__about__.py"
 
-[tool.hatch.envs.dev]
-dependencies = [
+[dependency-groups]
+dev = [
     "pbspy[test]",
 ]
 

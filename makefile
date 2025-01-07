@@ -1,36 +1,27 @@
 lint:
-	hatch -e dev run pre-commit run --all-files
-
-version:
-	hatch version
+	uv run pre-commit run --all-files
 
 docs:
 	rm -r docs/build || true
-	hatch -e dev run sphinx-build docs/ docs/build/
+	uv run sphinx-build docs/ docs/build/
 
 example:
-	hatch run python examples/run.py
+	uv run examples/run.py
 
 build:
 	rm -r dist || true
-	hatch build
+	uv build
 
 clean:
-	hatch env prune
-
-publish:
-	rm -r dist || true
-	hatch build
-	hatch publish
+	uv clean
 
 # Show available make targets
 help:
 	@echo "Available targets:"
 	@echo "  lint         - Lint code with pre-commit hooks on all files"
-	@echo "  version      - Display the package version"
+	@echo "  docs         - Build the docs"
 	@echo "  example      - Run the example"
 	@echo "  build        - Build the package"
 	@echo "  clean        - Clean temporary environments"
-	@echo "  publish      - Publish the package"
 
 .PHONY: all docs clean
