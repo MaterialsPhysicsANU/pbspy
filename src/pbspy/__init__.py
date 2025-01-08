@@ -66,7 +66,52 @@ def _try_get_exit_code(job_id: str) -> int | None:
         raise RuntimeError("Could not get exit code")
 
 
-def _pbs_wait_for_jobs(jobs: list[Job]) -> None:
+def _pbs_wait_for_jobs(jobs: list[Job], progress: bool = True) -> None:
+    """
+    Waits for the PBS jobs to complete.
+
+    Args:
+        jobs (list[Job]): A list of Job objects representing the PBS jobs.
+        progress (bool): Whether or not to print the state of the job and status on exit.
+
+    Returns:
+        None
+    """
+    if progress:
+        _pbs_wait_for_jobs_with_progress(jobs)
+    else:
+        _pbs_wait_for_jobs_quiet(jobs)
+
+
+def _pbs_wait_for_jobs_quiet(jobs: list[Job]) -> None:
+    """
+    Waits for the PBS jobs to complete.
+
+    Args:
+        jobs (list[Job]): A list of Job objects representing the PBS jobs.
+
+    Returns:
+        None
+    """
+    task_done = [False] * len(jobs)
+    while not all(task_done):
+        time.sleep(60)
+        for i, job in enumerate(jobs):
+            if task_done[i]:
+                continue
+            process = subprocess.run(
+                ["qstat", job.job_id],
+                capture_output=True,
+            )
+            if process.returncode != 0:
+                output = process.stdout.decode("utf-8")
+                if job.job_id not in output or "has finished" in process.stderr.decode("utf-8"):
+                    task_done[i] = True
+            # else:
+            # raise RuntimeError(f"Failed to check job status: {process.stderr.decode('utf-8')}")
+
+
+def _pbs_wait_for_jobs_with_progress(jobs: list[Job]) -> None:
     """
     Waits for the PBS jobs to complete.
 
@@ -151,11 +196,14 @@ class Job:
     description: str | None = None
     """A description of the job for progress updates. Unused by PBS."""
 
-    def wait(self) -> None:
+    def wait(self, progress: bool = True) -> None:
         """
         Wait for the job to complete.
+
+        Args:
+            progress (bool): Whether or not to print the state of the job and status on exit.
         """
-        _pbs_wait_for_jobs([self])
+        _pbs_wait_for_jobs([self], progress=progress)
 
     def _result_no_wait(self) -> JobResult:
         """
@@ -206,26 +254,35 @@ class Job:
 
         return JobResult(exit_code=exit_code, output=output, error=error, stats=pbs_stats)
 
-    def result(self) -> JobResult:
+    def result(self, progress: bool = True) -> JobResult:
         """
         Waits for the job to complete and returns the result.
+
+        Args:
+            progress (bool): Whether or not to print the state of the job and status on exit.
         """
-        self.wait()
+        self.wait(progress=progress)
         return self._result_no_wait()
 
     @staticmethod
-    def wait_all(jobs: list[Job]) -> None:
+    def wait_all(jobs: list[Job], progress: bool = True) -> None:
         """
         Waits for multiple jobs to complete.
+
+        Args:
+            progress (bool): Whether or not to print the state of the job and status on exit.
         """
-        _pbs_wait_for_jobs(jobs)
+        _pbs_wait_for_jobs(jobs, progress=progress)
 
     @staticmethod
-    def result_all(jobs: list[Job]) -> list[JobResult]:
+    def result_all(jobs: list[Job], progress: bool = True) -> list[JobResult]:
         """
         Waits for multiple jobs to complete and returns their results.
+
+        Args:
+            progress (bool): Whether or not to print the state of the job and status on exit.
         """
-        _pbs_wait_for_jobs(jobs)
+        _pbs_wait_for_jobs(jobs, progress=progress)
         return [job._result_no_wait() for job in jobs]
 
 

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Add `progress` arg to `Job.{wait,wait_all,result,result_all}` defaulting to `True`
+  - If `False`, jobs will wait without no stdout output
 - Change `makefile` to use `uv`
 
 ## [0.0.5] - 2024-09-24
