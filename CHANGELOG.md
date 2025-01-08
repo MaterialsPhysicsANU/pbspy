@@ -7,12 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
+## [0.0.6] - 2025-01-08
+
+### Added
 
 - Add `progress` arg to `Job.{wait,wait_all,result,result_all}` defaulting to `True`
-  - If `False`, jobs will wait without no stdout output
-- Change `makefile` to use `uv`
+  - If `False`, these methods will not output to stdout during execution or on job completion
 - Add publish GH action
+
+### Changed
+
+- Change `makefile` to use `uv`
 
 ## [0.0.5] - 2024-09-24
 
@@ -66,7 +71,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
-[unreleased]: https://github.com/MaterialsPhysicsANU/pbspy/compare/v0.0.5...HEAD
+[unreleased]: https://github.com/MaterialsPhysicsANU/pbspy/compare/v0.0.6...HEAD
+[0.0.6]: https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.6
 [0.0.5]: https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.5
 [0.0.4]: https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.4
 [0.0.3]: https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.3
