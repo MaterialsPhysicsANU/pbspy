@@ -186,7 +186,7 @@ API
 
       .. autodoc2-docstring:: pbspy.Job.description
 
-   .. py:method:: wait() -> None
+   .. py:method:: wait(progress: bool = True) -> None
       :canonical: pbspy.Job.wait
 
       .. autodoc2-docstring:: pbspy.Job.wait
@@ -196,18 +196,18 @@ API
 
       .. autodoc2-docstring:: pbspy.Job._result_no_wait
 
-   .. py:method:: result() -> pbspy.JobResult
+   .. py:method:: result(progress: bool = True) -> pbspy.JobResult
       :canonical: pbspy.Job.result
 
       .. autodoc2-docstring:: pbspy.Job.result
 
-   .. py:method:: wait_all(jobs: list[pbspy.Job]) -> None
+   .. py:method:: wait_all(jobs: list[pbspy.Job], progress: bool = True) -> None
       :canonical: pbspy.Job.wait_all
       :staticmethod:
 
       .. autodoc2-docstring:: pbspy.Job.wait_all
 
-   .. py:method:: result_all(jobs: list[pbspy.Job]) -> list[pbspy.JobResult]
+   .. py:method:: result_all(jobs: list[pbspy.Job], progress: bool = True) -> list[pbspy.JobResult]
       :canonical: pbspy.Job.result_all
       :staticmethod:
 
