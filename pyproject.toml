@@ -20,26 +20,21 @@ classifiers = [
 license = {text = "MIT License"}
 dependencies = [
   "rich~=13.8",
-  "typer~=0.12.5",
 ]
 
-[project.optional-dependencies]
-test = [
-    "pre-commit",
-    "pytest",
-    "mypy",
-    "ruff",
-    "sphinx",
-    "sphinx-autodoc2",
+[dependency-groups]
+dev = [
+    "mypy>=1.14.1",
+    "pre-commit>=4.0.1",
+    "pytest>=8.3.4",
+    "ruff>=0.8.6",
+    "sphinx>=8.1.3",
+    "sphinx-autodoc2>=0.5.0",
+    "typer>=0.12.5",
 ]
 
 [tool.hatch.version]
 path = "src/pbspy/__about__.py"
-
-[dependency-groups]
-dev = [
-    "pbspy[test]",
-]
 
 [[tool.hatch.envs.test.matrix]]
 python = ["3.11", "3.12"]
