@@ -323,9 +323,11 @@ class JobDescription:
     commands: list[str | list[str]] = field(default_factory=list)
     """A list of commands to be executed in the job."""
 
+    project: str | None = None
+    """The project under which to run the job."""
+
     queue: str | None = None
-    """The name of the queue to submit the job to.
-    """
+    """The name of the queue to submit the job to."""
 
     ncpus: int | None = None
     """The number of CPUs required for the job."""
@@ -388,6 +390,7 @@ class JobDescription:
         commands_str = "\n".join(commands)
 
         job_script = f"""#!/bin/bash
+{f"#PBS -P {self.project}" if self.project else ""}
 {f"#PBS -N {self.name}" if self.name else ""}
 {f"#PBS -q {self.queue}" if self.queue else ""}
 {f"#PBS -l ncpus={self.ncpus}" if self.ncpus else ""}
