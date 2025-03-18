@@ -78,6 +78,13 @@ API
 
       .. autodoc2-docstring:: pbspy.JobDescription.commands
 
+   .. py:attribute:: project
+      :canonical: pbspy.JobDescription.project
+      :type: str | None
+      :value: None
+
+      .. autodoc2-docstring:: pbspy.JobDescription.project
+
    .. py:attribute:: queue
       :canonical: pbspy.JobDescription.queue
       :type: str | None
