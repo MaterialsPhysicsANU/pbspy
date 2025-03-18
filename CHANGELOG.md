@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.8] - 2025-03-18
+
 ### Added
 
 - Add `project` to `JobDescription`
@@ -81,7 +83,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
-[unreleased]: https://github.com/MaterialsPhysicsANU/pbspy/compare/v0.0.7...HEAD
+[unreleased]: https://github.com/MaterialsPhysicsANU/pbspy/compare/v0.0.8...HEAD
+[0.0.8]: https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.8
 [0.0.7]: https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.7
 [0.0.6]: https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.6
 [0.0.5]: https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.5
