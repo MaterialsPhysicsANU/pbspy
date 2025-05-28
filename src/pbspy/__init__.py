@@ -133,29 +133,29 @@ def _pbs_wait_for_jobs_with_progress(jobs: list[Job]) -> None:
             time.sleep(1)
             if time.time() - last_check > 60:
                 last_check = time.time()
+                process = subprocess.run(
+                    ["qstat"],
+                    capture_output=True,
+                )
+                if process.returncode != 0:
+                    output = process.stdout.decode("utf-8")
                 for i, (job, task) in enumerate(zip(jobs, tasks, strict=False)):
                     if task_done[i]:
                         continue
-                    process = subprocess.run(
-                        ["qstat", job.job_id],
-                        capture_output=True,
-                    )
-                    if process.returncode != 0:
-                        output = process.stdout.decode("utf-8")
-                        if job.job_id not in output or "has finished" in process.stderr.decode("utf-8"):
-                            task_done[i] = True
-                            progress.advance(task)
-                            progress.update(task, visible=False)
+                    if job.job_id not in output:
+                        task_done[i] = True
+                        progress.advance(task)
+                        progress.update(task, visible=False)
 
-                            # Try and get the exit code
-                            exit_code = _try_get_exit_code(job.job_id)
-                            if exit_code is None:
-                                output_status = "[yellow]?"
-                            else:
-                                output_status = "[green]✓" if exit_code == 0 else "[red]✗"
-                            progress.console.print(
-                                f'{output_status} {job.job_id} {job.job_name} {job.description or ""}'
-                            )
+                        # Try and get the exit code
+                        exit_code = _try_get_exit_code(job.job_id)
+                        if exit_code is None:
+                            output_status = "[yellow]?"
+                        else:
+                            output_status = "[green]✓" if exit_code == 0 else "[red]✗"
+                        progress.console.print(
+                            f'{output_status} {job.job_id} {job.job_name} {job.description or ""}'
+                        )
                     # else:
                     # raise RuntimeError(f"Failed to check job status: {process.stderr.decode('utf-8')}")
             progress.refresh()
