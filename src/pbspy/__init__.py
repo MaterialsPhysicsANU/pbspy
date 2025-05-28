@@ -137,8 +137,7 @@ def _pbs_wait_for_jobs_with_progress(jobs: list[Job]) -> None:
                     ["qstat"],
                     capture_output=True,
                 )
-                if process.returncode != 0:
-                    output = process.stdout.decode("utf-8")
+                output = process.stdout.decode("utf-8")
                 for i, (job, task) in enumerate(zip(jobs, tasks, strict=False)):
                     if task_done[i]:
                         continue
