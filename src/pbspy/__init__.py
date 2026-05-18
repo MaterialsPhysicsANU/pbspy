@@ -350,6 +350,12 @@ class JobDescription:
     afterok: list[Job] = field(default_factory=list)
     """A list of jobs that this job depends on."""
 
+    output_path: str | None = None
+    """Path for the job's stdout output file. Example: ``/scratch/project/job.out``"""
+
+    error_path: str | None = None
+    """Path for the job's stderr error file. Example: ``/scratch/project/job.err``"""
+
     @classmethod
     def from_nodes(cls, nnodes: int, queue: str, queue_limits: QueueLimits, **kwargs: Any) -> JobDescription:
         """
@@ -398,6 +404,8 @@ class JobDescription:
 {f"#PBS -l jobfs={self.jobfs}" if self.jobfs else ""}
 {f"#PBS -l walltime={self.walltime}" if self.walltime else ""}
 {f"#PBS -l storage={self.storage}" if self.storage else ""}
+{f"#PBS -o {self.output_path}" if self.output_path else ""}
+{f"#PBS -e {self.error_path}" if self.error_path else ""}
 {"#PBS -l wd" if self.wd else ""}
 {f'#PBS -W depend=afterok:{":".join([job.job_id for job in self.afterok])}' if len(self.afterok) > 0 else ""}
 {commands_str}
