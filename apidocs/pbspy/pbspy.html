@@ -10,8 +10,8 @@
     <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
     <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="pbspy.gadi" href="pbspy.gadi.html" />
@@ -79,11 +79,11 @@
 <h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="pbspy.JobDescription">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pbspy.</span></span><span class="sig-name descname"><span class="pre">JobDescription</span></span><a class="headerlink" href="#pbspy.JobDescription" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pbspy.</span></span><span class="sig-name descname"><span class="pre">JobDescription</span></span><a class="headerlink" href="#pbspy.JobDescription" title="Link to this definition">¶</a></dt>
 <dd><p>A description of a PBS job for submission.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.JobDescription.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.JobDescription.name" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.JobDescription.name" title="Link to this definition">¶</a></dt>
 <dd><p>The job name.</p>
 <p>Note that PBS systems have constraints on valid job names.
 A job will be rejected if the name is not valid.</p>
@@ -91,73 +91,85 @@ A job will be rejected if the name is not valid.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.JobDescription.description">
-<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.JobDescription.description" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.JobDescription.description" title="Link to this definition">¶</a></dt>
 <dd><p>A description of the job for progress updates. Unused by PBS.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.JobDescription.commands">
-<span class="sig-name descname"><span class="pre">commands</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'field(...)'</span></em><a class="headerlink" href="#pbspy.JobDescription.commands" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">commands</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'field(...)'</span></span><a class="headerlink" href="#pbspy.JobDescription.commands" title="Link to this definition">¶</a></dt>
 <dd><p>A list of commands to be executed in the job.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.JobDescription.project">
-<span class="sig-name descname"><span class="pre">project</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.JobDescription.project" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">project</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.JobDescription.project" title="Link to this definition">¶</a></dt>
 <dd><p>The project under which to run the job.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.JobDescription.queue">
-<span class="sig-name descname"><span class="pre">queue</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.JobDescription.queue" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">queue</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.JobDescription.queue" title="Link to this definition">¶</a></dt>
 <dd><p>The name of the queue to submit the job to.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.JobDescription.ncpus">
-<span class="sig-name descname"><span class="pre">ncpus</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.JobDescription.ncpus" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ncpus</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.JobDescription.ncpus" title="Link to this definition">¶</a></dt>
 <dd><p>The number of CPUs required for the job.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.JobDescription.mem">
-<span class="sig-name descname"><span class="pre">mem</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.JobDescription.mem" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">mem</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.JobDescription.mem" title="Link to this definition">¶</a></dt>
 <dd><p>The amount of memory required for the job. Example: <code class="docutils literal notranslate"><span class="pre">100GB</span></code></p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.JobDescription.jobfs">
-<span class="sig-name descname"><span class="pre">jobfs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.JobDescription.jobfs" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">jobfs</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.JobDescription.jobfs" title="Link to this definition">¶</a></dt>
 <dd><p>The amount of job file system space required for the job. Example: <code class="docutils literal notranslate"><span class="pre">1GB</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.JobDescription.walltime">
-<span class="sig-name descname"><span class="pre">walltime</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.JobDescription.walltime" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">walltime</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.JobDescription.walltime" title="Link to this definition">¶</a></dt>
 <dd><p>The maximum walltime for the job. Example: <code class="docutils literal notranslate"><span class="pre">00:05:00</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.JobDescription.storage">
-<span class="sig-name descname"><span class="pre">storage</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.JobDescription.storage" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">storage</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.JobDescription.storage" title="Link to this definition">¶</a></dt>
 <dd><p>The storage requirements for the job. Example: <code class="docutils literal notranslate"><span class="pre">10GB</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.JobDescription.wd">
-<span class="sig-name descname"><span class="pre">wd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pbspy.JobDescription.wd" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">wd</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#pbspy.JobDescription.wd" title="Link to this definition">¶</a></dt>
 <dd><p>A flag indicating whether the working directory should be used.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.JobDescription.afterok">
-<span class="sig-name descname"><span class="pre">afterok</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pbspy.Job" title="pbspy.Job"><span class="pre">pbspy.Job</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'field(...)'</span></em><a class="headerlink" href="#pbspy.JobDescription.afterok" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">afterok</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pbspy.Job" title="pbspy.Job"><span class="pre">pbspy.Job</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'field(...)'</span></span><a class="headerlink" href="#pbspy.JobDescription.afterok" title="Link to this definition">¶</a></dt>
 <dd><p>A list of jobs that this job depends on.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pbspy.JobDescription.output_path">
+<span class="sig-name descname"><span class="pre">output_path</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.JobDescription.output_path" title="Link to this definition">¶</a></dt>
+<dd><p>Path for the job’s stdout output file. Example: <code class="docutils literal notranslate"><span class="pre">/scratch/project/job.out</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pbspy.JobDescription.error_path">
+<span class="sig-name descname"><span class="pre">error_path</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.JobDescription.error_path" title="Link to this definition">¶</a></dt>
+<dd><p>Path for the job’s stderr error file. Example: <code class="docutils literal notranslate"><span class="pre">/scratch/project/job.err</span></code></p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pbspy.JobDescription.from_nodes">
-<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nnodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue_limits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pbspy.QueueLimits" title="pbspy.QueueLimits"><span class="pre">pbspy.QueueLimits</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pbspy.JobDescription" title="pbspy.JobDescription"><span class="pre">pbspy.JobDescription</span></a></span></span><a class="headerlink" href="#pbspy.JobDescription.from_nodes" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nnodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue_limits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pbspy.QueueLimits" title="pbspy.QueueLimits"><span class="pre">pbspy.QueueLimits</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pbspy.JobDescription" title="pbspy.JobDescription"><span class="pre">pbspy.JobDescription</span></a></span></span><a class="headerlink" href="#pbspy.JobDescription.from_nodes" title="Link to this definition">¶</a></dt>
 <dd><p>Creates a job description that uses all available resources for some number of nodes.</p>
 </dd></dl>
 
@@ -189,23 +201,23 @@ A job will be rejected if the name is not valid.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pbspy.Job">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pbspy.</span></span><span class="sig-name descname"><span class="pre">Job</span></span><a class="headerlink" href="#pbspy.Job" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pbspy.</span></span><span class="sig-name descname"><span class="pre">Job</span></span><a class="headerlink" href="#pbspy.Job" title="Link to this definition">¶</a></dt>
 <dd><p>A PBS job.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.Job.job_name">
-<span class="sig-name descname"><span class="pre">job_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.Job.job_name" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">job_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.Job.job_name" title="Link to this definition">¶</a></dt>
 <dd><p>The job name.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.Job.job_id">
-<span class="sig-name descname"><span class="pre">job_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.Job.job_id" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">job_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.Job.job_id" title="Link to this definition">¶</a></dt>
 <dd><p>The job identifier.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.Job.description">
-<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.Job.description" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.Job.description" title="Link to this definition">¶</a></dt>
 <dd><p>A description of the job for progress updates. Unused by PBS.</p>
 </dd></dl>
 
@@ -238,7 +250,7 @@ A job will be rejected if the name is not valid.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pbspy.Job.wait_all">
-<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wait_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pbspy.Job" title="pbspy.Job"><span class="pre">pbspy.Job</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pbspy.Job.wait_all" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">wait_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pbspy.Job" title="pbspy.Job"><span class="pre">pbspy.Job</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pbspy.Job.wait_all" title="Link to this definition">¶</a></dt>
 <dd><p>Waits for multiple jobs to complete.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>progress (bool): Whether or not to print the state of the job and status on exit.</p>
@@ -248,7 +260,7 @@ A job will be rejected if the name is not valid.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pbspy.Job.result_all">
-<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">result_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pbspy.Job" title="pbspy.Job"><span class="pre">pbspy.Job</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pbspy.JobResult" title="pbspy.JobResult"><span class="pre">pbspy.JobResult</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pbspy.Job.result_all" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">result_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pbspy.Job" title="pbspy.Job"><span class="pre">pbspy.Job</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pbspy.JobResult" title="pbspy.JobResult"><span class="pre">pbspy.JobResult</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pbspy.Job.result_all" title="Link to this definition">¶</a></dt>
 <dd><p>Waits for multiple jobs to complete and returns their results.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>progress (bool): Whether or not to print the state of the job and status on exit.</p>
@@ -260,30 +272,30 @@ A job will be rejected if the name is not valid.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pbspy.JobResult">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pbspy.</span></span><span class="sig-name descname"><span class="pre">JobResult</span></span><a class="headerlink" href="#pbspy.JobResult" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pbspy.</span></span><span class="sig-name descname"><span class="pre">JobResult</span></span><a class="headerlink" href="#pbspy.JobResult" title="Link to this definition">¶</a></dt>
 <dd><p>The result (stdout, stderr, etc.) of a completed PBS job.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.JobResult.exit_code">
-<span class="sig-name descname"><span class="pre">exit_code</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.JobResult.exit_code" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">exit_code</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.JobResult.exit_code" title="Link to this definition">¶</a></dt>
 <dd><p>The exit code of the job if it could be determined, <code class="docutils literal notranslate"><span class="pre">None</span></code> otherwise.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.JobResult.output">
-<span class="sig-name descname"><span class="pre">output</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;Multiline-String&gt;</span></em><a class="headerlink" href="#pbspy.JobResult.output" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">output</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;Multiline-String&gt;</span></span><a class="headerlink" href="#pbspy.JobResult.output" title="Link to this definition">¶</a></dt>
 <dd><p>The job output (stdout).</p>
 <p>PBS stats are separated from the job output into <code class="docutils literal notranslate"><span class="pre">stats</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.JobResult.error">
-<span class="sig-name descname"><span class="pre">error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;Multiline-String&gt;</span></em><a class="headerlink" href="#pbspy.JobResult.error" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">error</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;Multiline-String&gt;</span></span><a class="headerlink" href="#pbspy.JobResult.error" title="Link to this definition">¶</a></dt>
 <dd><p>The job error (stderr).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.JobResult.stats">
-<span class="sig-name descname"><span class="pre">stats</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.JobResult.stats" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">stats</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.JobResult.stats" title="Link to this definition">¶</a></dt>
 <dd><p>PBS stats extracted from the job output.</p>
 </dd></dl>
 
@@ -291,23 +303,23 @@ A job will be rejected if the name is not valid.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pbspy.QueueLimits">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pbspy.</span></span><span class="sig-name descname"><span class="pre">QueueLimits</span></span><a class="headerlink" href="#pbspy.QueueLimits" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pbspy.</span></span><span class="sig-name descname"><span class="pre">QueueLimits</span></span><a class="headerlink" href="#pbspy.QueueLimits" title="Link to this definition">¶</a></dt>
 <dd><p>Represents the resource limits of a queue.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.QueueLimits.cpus_per_node">
-<span class="sig-name descname"><span class="pre">cpus_per_node</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.QueueLimits.cpus_per_node" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">cpus_per_node</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.QueueLimits.cpus_per_node" title="Link to this definition">¶</a></dt>
 <dd><p>The number of CPUs per node.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.QueueLimits.max_mem_per_node">
-<span class="sig-name descname"><span class="pre">max_mem_per_node</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.QueueLimits.max_mem_per_node" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">max_mem_per_node</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.QueueLimits.max_mem_per_node" title="Link to this definition">¶</a></dt>
 <dd><p>The maximum memory per node (in GB).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.QueueLimits.max_jobfs_per_node">
-<span class="sig-name descname"><span class="pre">max_jobfs_per_node</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.QueueLimits.max_jobfs_per_node" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">max_jobfs_per_node</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.QueueLimits.max_jobfs_per_node" title="Link to this definition">¶</a></dt>
 <dd><p>The maximum JOBFS per node (in GB).</p>
 </dd></dl>
 
@@ -315,7 +327,7 @@ A job will be rejected if the name is not valid.</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="pbspy.QueueLimitsMap">
-<span class="sig-prename descclassname"><span class="pre">pbspy.</span></span><span class="sig-name descname"><span class="pre">QueueLimitsMap</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">TypeAlias</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pbspy.QueueLimitsMap" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pbspy.</span></span><span class="sig-name descname"><span class="pre">QueueLimitsMap</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">TypeAlias</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.QueueLimitsMap" title="Link to this definition">¶</a></dt>
 <dd><p>A map of queue names to queue limits.</p>
 </dd></dl>
 
@@ -373,6 +385,8 @@ A job will be rejected if the name is not valid.</p>
 <li class="toctree-l6"><a class="reference internal" href="#pbspy.JobDescription.storage"><code class="docutils literal notranslate"><span class="pre">JobDescription.storage</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#pbspy.JobDescription.wd"><code class="docutils literal notranslate"><span class="pre">JobDescription.wd</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#pbspy.JobDescription.afterok"><code class="docutils literal notranslate"><span class="pre">JobDescription.afterok</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pbspy.JobDescription.output_path"><code class="docutils literal notranslate"><span class="pre">JobDescription.output_path</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pbspy.JobDescription.error_path"><code class="docutils literal notranslate"><span class="pre">JobDescription.error_path</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#pbspy.JobDescription.from_nodes"><code class="docutils literal notranslate"><span class="pre">JobDescription.from_nodes()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#pbspy.JobDescription.add_command"><code class="docutils literal notranslate"><span class="pre">JobDescription.add_command()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#pbspy.JobDescription.add_commands"><code class="docutils literal notranslate"><span class="pre">JobDescription.add_commands()</span></code></a></li>
@@ -442,7 +456,7 @@ A job will be rejected if the name is not valid.</p>
       &#169;.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |

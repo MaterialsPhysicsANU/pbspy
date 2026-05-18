@@ -141,6 +141,20 @@ API
 
       .. autodoc2-docstring:: pbspy.JobDescription.afterok
 
+   .. py:attribute:: output_path
+      :canonical: pbspy.JobDescription.output_path
+      :type: str | None
+      :value: None
+
+      .. autodoc2-docstring:: pbspy.JobDescription.output_path
+
+   .. py:attribute:: error_path
+      :canonical: pbspy.JobDescription.error_path
+      :type: str | None
+      :value: None
+
+      .. autodoc2-docstring:: pbspy.JobDescription.error_path
+
    .. py:method:: from_nodes(nnodes: int, queue: str, queue_limits: pbspy.QueueLimits, **kwargs: typing.Any) -> pbspy.JobDescription
       :canonical: pbspy.JobDescription.from_nodes
       :classmethod:
