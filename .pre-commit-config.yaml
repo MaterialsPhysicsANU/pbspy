@@ -50,6 +50,7 @@ repos:
         additional_dependencies:
           - rich
           - typer
+          - pytest
   - repo: https://github.com/scientific-python/cookie
     rev: 2024.04.23
     hooks:

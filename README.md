@@ -12,6 +12,8 @@ See the [documentation](https://MaterialsPhysicsANU.github.io/pbspy/) for more i
 
 ## Example
 
+### Running directly on a supercomputer login-node
+
 ```python
 from pbspy import Job, JobDescription
 
@@ -38,14 +40,49 @@ print("job_a:", result_a.output.strip())
 print("job_b:", result_b.output.strip())
 ```
 
-Output (partially executed):
+### Submitting from a remote machine via SSH
+
+Install `pbspy` on your supercomputer via the mechanism of your choice, for instance:
+
+```bash
+uv tool install pbspy
+```
+
+Then use `SSHBackend` on your local machine — the server daemon starts automatically on first use
+and is reused by subsequent connections:
+
+```python
+from pbspy import Job, JobDescription, SSHBackend
+
+backend = SSHBackend("user@gadi.nci.org.au")
+
+job_a = (
+    JobDescription(name="job_a", ncpus=4, mem="192GB", walltime="00:05:00")
+    .add_command(["echo", "A"])
+    .submit(backend=backend)
+)
+
+job_b = (
+    JobDescription(name="job_b", ncpus=1, walltime="00:05:00", afterok=[job_a])
+    .add_command(["echo", "B"])
+    .submit(backend=backend)
+)
+
+(result_a, result_b) = Job.result_all([job_a, job_b])
+print("job_a:", result_a.output.strip())
+print("job_b:", result_b.output.strip())
+```
+
+The `SSHBackend` uses your existing SSH configuration (keys, `~/.ssh/config` aliases, ssh-agent).
+
+## Output (partially executed)
 
 ```text
 ✓ 124397435.gadi-pbs job_a
 0:01:15 124397436.gadi-pbs job_b
 ```
 
-Output (completed):
+## Output (completed)
 
 ```text
 ✓ 124397435.gadi-pbs job_a
@@ -55,6 +92,6 @@ job_a: A
 job_b: B
 ```
 
-## Licence
+## License
 
 `pbspy` is licensed under the MIT License [LICENSE](./LICENSE) or <http://opensource.org/licenses/MIT>.

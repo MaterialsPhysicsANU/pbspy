@@ -4,161 +4,28 @@ Utilities for PBS job submission and output retrieval.
 
 from __future__ import annotations
 
-import re
-import shlex
-import subprocess
-import time
 from dataclasses import dataclass, field
 from typing import Any, Self, TypeAlias
 
-from rich.progress import Progress, TextColumn, TimeElapsedColumn
+from pbspy._backend import Backend
+from pbspy._local_backend import LocalBackend
+from pbspy._ssh_backend import SSHBackend
 
-__all__ = ["JobDescription", "Job", "JobResult", "QueueLimits", "QueueLimitsMap", "gadi"]
+# Shared LocalBackend instance so all locally-submitted jobs are grouped together
+# when calling Job.wait_all() / Job.result_all(), restoring concurrent polling.
+_DEFAULT_LOCAL_BACKEND = LocalBackend()
 
-
-def _get_job_name(job_id: str) -> str:
-    process = subprocess.run(
-        ["qstat", "-fx", job_id],
-        capture_output=True,
-    )
-    if process.returncode != 0:
-        raise RuntimeError(f"Failed to get job status: {process.stderr.decode('utf-8')}")
-    output = process.stdout.decode("utf-8")
-
-    # Grab the exit code
-    # NOTE: This is not always immediately set when the job finishes...
-    re_match = re.search(r"Job_Name = ([^\s]+)", output)
-    if re_match is not None:
-        group = re_match.group(1)
-        assert group
-        return group
-    else:
-        raise RuntimeError("Could not retrieve job name")
-
-
-def _try_get_exit_code(job_id: str) -> int | None:
-    """
-    Retrieves the exit code of a job with the given job ID.
-
-    Args:
-        job_id (str): The ID of the job.
-
-    Returns:
-        int | None: The exit code of the job if available, None otherwise.
-    """
-    # Get the exit code
-    process = subprocess.run(
-        ["qstat", "-fx", job_id],
-        capture_output=True,
-    )
-    if process.returncode != 0:
-        raise RuntimeError(f"Failed to get job status: {process.stderr.decode('utf-8')}")
-    output = process.stdout.decode("utf-8")
-
-    # Grab the exit code
-    # NOTE: This is not always immediately set when the job finishes...
-    exit_code_match = re.search(r"Exit_status = (\d+)", output)
-    if exit_code_match is not None:
-        exit_code_group = exit_code_match.group(1)
-        assert exit_code_group
-        return int(exit_code_group)
-    else:
-        raise RuntimeError("Could not get exit code")
-
-
-def _pbs_wait_for_jobs(jobs: list[Job], progress: bool = True) -> None:
-    """
-    Waits for the PBS jobs to complete.
-
-    Args:
-        jobs (list[Job]): A list of Job objects representing the PBS jobs.
-        progress (bool): Whether or not to print the state of the job and status on exit.
-
-    Returns:
-        None
-    """
-    if progress:
-        _pbs_wait_for_jobs_with_progress(jobs)
-    else:
-        _pbs_wait_for_jobs_quiet(jobs)
-
-
-def _pbs_wait_for_jobs_quiet(jobs: list[Job]) -> None:
-    """
-    Waits for the PBS jobs to complete.
-
-    Args:
-        jobs (list[Job]): A list of Job objects representing the PBS jobs.
-
-    Returns:
-        None
-    """
-    task_done = [False] * len(jobs)
-    while not all(task_done):
-        time.sleep(60)
-        for i, job in enumerate(jobs):
-            if task_done[i]:
-                continue
-            process = subprocess.run(
-                ["qstat", job.job_id],
-                capture_output=True,
-            )
-            if process.returncode != 0:
-                output = process.stdout.decode("utf-8")
-                if job.job_id not in output or "has finished" in process.stderr.decode("utf-8"):
-                    task_done[i] = True
-            # else:
-            # raise RuntimeError(f"Failed to check job status: {process.stderr.decode('utf-8')}")
-
-
-def _pbs_wait_for_jobs_with_progress(jobs: list[Job]) -> None:
-    """
-    Waits for the PBS jobs to complete.
-
-    Args:
-        jobs (list[Job]): A list of Job objects representing the PBS jobs.
-
-    Returns:
-        None
-    """
-    last_check = time.time()
-    with Progress(
-        TimeElapsedColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        auto_refresh=False,
-    ) as progress:
-        tasks = [progress.add_task(f"{job.job_id} {job.job_name} {job.description or ''}", total=1) for job in jobs]
-        task_done = [False] * len(jobs)
-        while not all(task_done):
-            time.sleep(1)
-            if time.time() - last_check > 60:
-                last_check = time.time()
-                for i, (job, task) in enumerate(zip(jobs, tasks, strict=False)):
-                    if task_done[i]:
-                        continue
-                    process = subprocess.run(
-                        ["qstat", job.job_id],
-                        capture_output=True,
-                    )
-                    if process.returncode != 0:
-                        output = process.stdout.decode("utf-8")
-                        if job.job_id not in output or "has finished" in process.stderr.decode("utf-8"):
-                            task_done[i] = True
-                            progress.advance(task)
-                            progress.update(task, visible=False)
-
-                            # Try and get the exit code
-                            exit_code = _try_get_exit_code(job.job_id)
-                            if exit_code is None:
-                                output_status = "[yellow]?"
-                            else:
-                                output_status = "[green]✓" if exit_code == 0 else "[red]✗"
-                            progress.console.print(
-                                f'{output_status} {job.job_id} {job.job_name} {job.description or ""}'
-                            )
-                    # else:
-                    # raise RuntimeError(f"Failed to check job status: {process.stderr.decode('utf-8')}")
-            progress.refresh()
+__all__ = [
+    "JobDescription",
+    "Job",
+    "JobResult",
+    "QueueLimits",
+    "QueueLimitsMap",
+    "Backend",
+    "LocalBackend",
+    "SSHBackend",
+    "gadi",
+]
 
 
 @dataclass
@@ -196,6 +63,9 @@ class Job:
     description: str | None = None
     """A description of the job for progress updates. Unused by PBS."""
 
+    backend: Backend = field(default=_DEFAULT_LOCAL_BACKEND, repr=False, compare=False)
+    """The backend used to submit and track this job."""
+
     def wait(self, progress: bool = True) -> None:
         """
         Wait for the job to complete.
@@ -203,56 +73,7 @@ class Job:
         Args:
             progress (bool): Whether or not to print the state of the job and status on exit.
         """
-        _pbs_wait_for_jobs([self], progress=progress)
-
-    def _result_no_wait(self) -> JobResult:
-        """
-        Return the result of a job without waiting.
-
-        If the job has not completed, this method will raise an error.
-        """
-
-        # Get output and error file
-        job_id_num = self.job_id.split(".")[0]  # Remove .gadi-pbspy suffix
-        output_file = f"{self.job_name}.o{job_id_num}"
-        error_file = f"{self.job_name}.e{job_id_num}"
-        try:
-            with open(output_file) as f:
-                output = f.read()
-        except FileNotFoundError:
-            output = ""
-        try:
-            with open(error_file) as f:
-                error = f.read()
-        except FileNotFoundError:
-            error = ""
-
-        # Try and process the output
-        output_split = output.split(
-            "\n======================================================================================\n"
-        )
-        exit_code = None
-        if len(output_split) == 3:
-            output = output_split[0]
-            stats = output_split[1].strip()
-            stats = "\n".join(stats.split("\n")[1:])  # Skip first line "Resource usage on .."
-            pbs_stats = dict()
-            pattern = re.compile(r"\s*([^:]+):\s*([^\s]+)")
-            for match in pattern.finditer(stats):
-                key = match.group(1).strip()
-                value = match.group(2).strip()
-                pbs_stats[key] = value
-                if key == "Exit Status":
-                    exit_code_match = re.search(r"^\d+", value)
-                    if exit_code_match is not None:
-                        exit_code = int(exit_code_match.group())
-        else:
-            pbs_stats = None
-
-        if exit_code is None:
-            exit_code = _try_get_exit_code(self.job_id)
-
-        return JobResult(exit_code=exit_code, output=output, error=error, stats=pbs_stats)
+        self.backend.wait([self], progress=progress)
 
     def result(self, progress: bool = True) -> JobResult:
         """
@@ -262,7 +83,7 @@ class Job:
             progress (bool): Whether or not to print the state of the job and status on exit.
         """
         self.wait(progress=progress)
-        return self._result_no_wait()
+        return self.backend.get_result(self)  # type: ignore[return-value]
 
     @staticmethod
     def wait_all(jobs: list[Job], progress: bool = True) -> None:
@@ -272,7 +93,10 @@ class Job:
         Args:
             progress (bool): Whether or not to print the state of the job and status on exit.
         """
-        _pbs_wait_for_jobs(jobs, progress=progress)
+        if not jobs:
+            return
+        # Group by backend so each backend can wait for its own jobs efficiently
+        _wait_all_grouped(jobs, progress=progress)
 
     @staticmethod
     def result_all(jobs: list[Job], progress: bool = True) -> list[JobResult]:
@@ -282,8 +106,20 @@ class Job:
         Args:
             progress (bool): Whether or not to print the state of the job and status on exit.
         """
-        _pbs_wait_for_jobs(jobs, progress=progress)
-        return [job._result_no_wait() for job in jobs]
+        Job.wait_all(jobs, progress=progress)
+        return [job.backend.get_result(job) for job in jobs]  # type: ignore[misc]
+
+
+def _wait_all_grouped(jobs: list[Job], progress: bool) -> None:
+    """Group jobs by backend identity and wait per group."""
+    groups: dict[int, tuple[Backend, list[Job]]] = {}
+    for job in jobs:
+        bid = id(job.backend)
+        if bid not in groups:
+            groups[bid] = (job.backend, [])
+        groups[bid][1].append(job)
+    for backend, group in groups.values():
+        backend.wait(group, progress=progress)
 
 
 @dataclass(kw_only=True)
@@ -387,50 +223,41 @@ class JobDescription:
         """
         Generate a PBS job script based on job description.
         """
-        commands: list[str] = []
-        for command in self.commands:
-            if isinstance(command, str):
-                commands.append(command)
-            elif isinstance(command, list):
-                commands.append(" ".join(shlex.quote(arg) for arg in command))
-        commands_str = "\n".join(commands)
+        from pbspy._pbs_core import format_job_script
 
-        job_script = f"""#!/bin/bash
-{f"#PBS -P {self.project}" if self.project else ""}
-{f"#PBS -N {self.name}" if self.name else ""}
-{f"#PBS -q {self.queue}" if self.queue else ""}
-{f"#PBS -l ncpus={self.ncpus}" if self.ncpus else ""}
-{f"#PBS -l mem={self.mem}" if self.mem else ""}
-{f"#PBS -l jobfs={self.jobfs}" if self.jobfs else ""}
-{f"#PBS -l walltime={self.walltime}" if self.walltime else ""}
-{f"#PBS -l storage={self.storage}" if self.storage else ""}
-{f"#PBS -o {self.output_path}" if self.output_path else ""}
-{f"#PBS -e {self.error_path}" if self.error_path else ""}
-{"#PBS -l wd" if self.wd else ""}
-{f'#PBS -W depend=afterok:{":".join([job.job_id for job in self.afterok])}' if len(self.afterok) > 0 else ""}
-{commands_str}
-"""
-        return job_script
-
-    def submit(self) -> Job:
-        """
-        Submits the job to the PBS queue using ``qsub``.
-        """
-        job_script = self.script()
-
-        process = subprocess.Popen(
-            ["qsub"],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+        return format_job_script(
+            name=self.name,
+            project=self.project,
+            queue=self.queue,
+            ncpus=self.ncpus,
+            mem=self.mem,
+            jobfs=self.jobfs,
+            walltime=self.walltime,
+            storage=self.storage,
+            wd=self.wd,
+            output_path=self.output_path,
+            error_path=self.error_path,
+            afterok_ids=[job.job_id for job in self.afterok],
+            commands=self.commands,
         )
-        stdout, stderr = process.communicate(input=job_script.encode("utf-8"))
 
-        if process.returncode != 0:
-            raise RuntimeError(f'Failed to submit job: {stderr.strip().decode("utf-8")}')
-        job_id = stdout.strip().decode("utf-8")
+    def submit(self, backend: Backend | None = None) -> Job:
+        """
+        Submits the job to the PBS queue.
+
+        Args:
+            backend: The backend to use for submission.  Defaults to
+                :class:`~pbspy.LocalBackend` (runs ``qsub`` locally).
+                Pass a :class:`~pbspy.SSHBackend` instance to submit to a
+                remote supercomputer over SSH.
+        """
+        if backend is None:
+            backend = LocalBackend()
+
+        job_script = self.script()
+        job_id, job_name = backend.submit(job_script, self.name)
 
         if self.name is None:
-            self.name = _get_job_name(job_id)
+            self.name = job_name
 
-        return Job(job_name=self.name, job_id=job_id, description=self.description)
+        return Job(job_name=job_name, job_id=job_id, description=self.description, backend=backend)

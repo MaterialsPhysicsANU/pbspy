@@ -1,10 +1,12 @@
 import typer
 from rich import print
 
-from pbspy import Job, JobDescription, QueueLimits
+from pbspy import Job, JobDescription, QueueLimits, SSHBackend
 
 
-def main() -> None:
+def main(remote: str = "") -> None:
+    backend = SSHBackend(remote) if remote else None
+
     # Run a job with some explicit parameters
     job_a = (
         JobDescription(
@@ -14,7 +16,7 @@ def main() -> None:
             walltime="00:05:00",
         )
         .add_command(["echo", "A"])
-        .submit()
+        .submit(backend=backend)
     )
 
     # Submit another job that waits for job_a to finish
@@ -30,7 +32,7 @@ def main() -> None:
             afterok=[job_a],
         )
         .add_command(["echo", "B"])
-        .submit()
+        .submit(backend=backend)
     )
 
     # Get the result of the jobs
