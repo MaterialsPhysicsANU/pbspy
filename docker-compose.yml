@@ -1,0 +1,10 @@
+services:
+  pbspy-server:
+    build: .
+    ports:
+      - "${PBSPY_PORT:-9876}:9876"
+    volumes:
+      - "${HOME}/.ssh:/home/pbspy/.ssh:ro"
+    environment:
+      - PBSPY_SSH_HOST=${SSH_HOST}
+      - PBSPY_SSH_USER=${SSH_USER:-}

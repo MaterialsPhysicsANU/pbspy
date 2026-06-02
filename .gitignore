@@ -174,3 +174,4 @@ cython_debug/
 
 *.e*
 *.o*
+!.env.example

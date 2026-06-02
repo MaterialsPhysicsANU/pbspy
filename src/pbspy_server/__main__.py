@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 
 
 def main() -> None:
@@ -20,11 +21,13 @@ def main() -> None:
     parser.add_argument(
         "--ssh-host",
         metavar="HOST",
+        default=os.environ.get("PBSPY_SSH_HOST"),
         help="Supercomputer hostname to SSH into for PBS commands.",
     )
     parser.add_argument(
         "--ssh-user",
         metavar="USER",
+        default=os.environ.get("PBSPY_SSH_USER"),
         help="SSH username on the supercomputer.",
     )
     parser.add_argument(
