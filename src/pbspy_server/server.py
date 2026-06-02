@@ -1,28 +1,25 @@
 """
 pbspy-server daemon.
 
-Listens on a TCP socket (hostname:random-port), writes the address to
-``~/.pbspy/server.addr`` so that any login node can find and connect to it,
-accepts one connection per client, and dispatches pickled requests from
-:mod:`pbspy._protocol`.
+Listens on a configured TCP port, accepts connections from :class:`~pbspy.ServerBackend`
+clients, and dispatches pickled requests from :mod:`pbspy._protocol`.
+
+PBS operations (qsub, qstat, file reads) are executed via SSH to a remote
+supercomputer when ``ssh_host`` is provided, or locally when omitted.
 
 A background thread polls ``qstat`` every 60 seconds for all unfinished jobs
 and pushes :class:`StatusUpdateResponse` frames to any clients waiting on
-those jobs.  Job state is held in memory for the daemon's lifetime; it is not
-persisted across restarts.
+those jobs.  Job state is held in memory and is not persisted across restarts.
 """
 
 from __future__ import annotations
 
-import json
 import logging
-import secrets
 import signal
 import socket
-import subprocess
 import threading
+from collections.abc import Callable
 from dataclasses import dataclass
-from pathlib import Path
 from typing import BinaryIO, cast
 
 import pbspy._pbs_core as core
@@ -33,7 +30,6 @@ __all__ = ["run_server"]
 
 logger = logging.getLogger(__name__)
 
-_ADDR_PATH = Path.home() / ".pbspy" / "server.addr"
 _POLL_INTERVAL = 60.0  # seconds between qstat polls
 
 
@@ -43,8 +39,7 @@ class _JobRecord:
 
     job_id: str
     job_name: str | None = None
-    state: str | None = None  # "Q", "R", "E", "F"
-    exit_code: int | None = None
+    finished: bool = False
 
 
 class _WaitSubscription:
@@ -61,18 +56,11 @@ class _WaitSubscription:
 class _ServerState:
     """Shared mutable state accessed by both connection threads and the poll thread."""
 
-    def __init__(self, token: str) -> None:
-        self.token = token
+    def __init__(self, runner: core.PBSRunner) -> None:
+        self.runner = runner
         self.lock = threading.Lock()
-        self.active_connections: int = 0
-        self._ever_had_connection: bool = False
         self.jobs: dict[str, _JobRecord] = {}
         self.subscriptions: dict[str, list[_WaitSubscription]] = {}
-
-    def add_subscription(self, sub: _WaitSubscription) -> None:
-        with self.lock:
-            for job_id in sub.pending:
-                self.subscriptions.setdefault(job_id, []).append(sub)
 
     def notify_finished(self, job_id: str, job: Job) -> None:
         """Mark job_id as done in all waiting subscriptions, sending frames as needed."""
@@ -106,68 +94,40 @@ def _cancel_all_subscriptions(state: _ServerState) -> None:
                 sub.done.set()
 
 
-def _should_shutdown(state: _ServerState) -> bool:
-    """Return True when the daemon has nothing left to do and can exit."""
-    with state.lock:
-        if not state._ever_had_connection:
-            return False
-        if state.active_connections > 0:
-            return False
-        return not any(r.state != "F" for r in state.jobs.values())
-
-
-def _poll_loop(state: _ServerState, stop_event: threading.Event, poll_interval: float = _POLL_INTERVAL) -> None:
+def _poll_loop(
+    state: _ServerState,
+    stop_event: threading.Event,
+    poll_interval: float = _POLL_INTERVAL,
+) -> None:
     """Background thread: polls qstat for all unfinished jobs."""
     while not stop_event.wait(timeout=poll_interval):
         try:
             with state.lock:
-                unfinished = [r for r in state.jobs.values() if r.state != "F"]
+                unfinished = [r for r in state.jobs.values() if not r.finished]
             for record in unfinished:
                 job = Job(job_id=record.job_id, job_name=record.job_name)
-                result = _check_job_finished(record.job_id)
-                if result is not None:
+                if _check_job_finished(record.job_id, state.runner) is not None:
                     with state.lock:
-                        record.state = "F"
-                        record.exit_code = result
+                        record.finished = True
                     state.notify_finished(record.job_id, job)
-            if _should_shutdown(state):
-                logger.info("No active connections and no unfinished jobs; shutting down")
-                stop_event.set()
         except Exception:
             logger.exception("Error in poll loop")
 
 
-def _check_job_finished(job_id: str) -> int | None:
+def _check_job_finished(job_id: str, runner: core.PBSRunner) -> int | None:
     """Return exit code if job has finished, else None."""
-    process = subprocess.run(["qstat", job_id], capture_output=True)
+    process = runner.run(["qstat", job_id])
     if process.returncode != 0:
         stdout = process.stdout.decode("utf-8")
         if job_id not in stdout or "has finished" in process.stderr.decode("utf-8"):
-            return core.try_get_exit_code(job_id) or 0
+            return core.try_get_exit_code(job_id, runner) or 0
     return None
 
 
-def _handle_connection(conn: socket.socket, state: _ServerState, stop_event: threading.Event) -> None:
+def _handle_connection(conn: socket.socket, state: _ServerState) -> None:
     """Handle a single client connection in its own thread."""
-    with state.lock:
-        state.active_connections += 1
-        state._ever_had_connection = True
     stream = cast(BinaryIO, conn.makefile("rwb", buffering=0))
     try:
-        # First frame must be a valid AuthRequest.
-        try:
-            auth = proto.recv_frame(stream)
-        except EOFError:
-            return
-        if not isinstance(auth, proto.AuthRequest) or auth.token != state.token:
-            logger.warning("Connection rejected: invalid or missing auth token")
-            try:
-                proto.send_frame(stream, proto.ErrorResponse(message="Authentication failed"))
-            except OSError:
-                pass
-            return
-        proto.send_frame(stream, proto.AuthOkResponse())
-
         while True:
             try:
                 request = proto.recv_frame(stream)
@@ -182,10 +142,10 @@ def _handle_connection(conn: socket.socket, state: _ServerState, stop_event: thr
                     proto.send_frame(stream, proto.PongResponse())
 
                 elif isinstance(request, proto.SubmitRequest):
-                    job_id, job_name = core.pbs_submit(request.script, request.name)
+                    job_id, job_name = core.pbs_submit(request.script, request.name, runner=state.runner)
                     job = Job(job_id=job_id, job_name=job_name)
                     with state.lock:
-                        state.jobs[job_id] = _JobRecord(job_id=job_id, job_name=job_name, state="Q")
+                        state.jobs[job_id] = _JobRecord(job_id=job_id, job_name=job_name)
                     proto.send_frame(stream, proto.SubmittedResponse(job=job))
 
                 elif isinstance(request, proto.WaitRequest):
@@ -196,7 +156,7 @@ def _handle_connection(conn: socket.socket, state: _ServerState, stop_event: thr
                     with state.lock:
                         for job in request.jobs:
                             record = state.jobs.get(job.job_id)
-                            if record and record.state == "F":
+                            if record and record.finished:
                                 sub.pending.discard(job.job_id)
                         if sub.pending:
                             for job_id in sub.pending:
@@ -207,7 +167,7 @@ def _handle_connection(conn: socket.socket, state: _ServerState, stop_event: thr
                         proto.send_frame(stream, proto.WaitDoneResponse(jobs=request.jobs))
 
                 elif isinstance(request, proto.ResultRequest):
-                    result: JobResult = core.pbs_get_result(request.job)
+                    result: JobResult = core.pbs_get_result(request.job, runner=state.runner)
                     proto.send_frame(stream, proto.ResultResponse(job=request.job, result=result))
 
                 else:
@@ -222,52 +182,50 @@ def _handle_connection(conn: socket.socket, state: _ServerState, stop_event: thr
     finally:
         stream.close()
         conn.close()
-        with state.lock:
-            state.active_connections -= 1
-        if _should_shutdown(state):
-            logger.info("Last client disconnected with no unfinished jobs; shutting down")
-            stop_event.set()
 
 
 def run_server(
-    addr_path: Path = _ADDR_PATH,
+    host: str = "0.0.0.0",
+    port: int = 9876,
+    ssh_host: str | None = None,
+    ssh_user: str | None = None,
+    ssh_args: list[str] | None = None,
     poll_interval: float = _POLL_INTERVAL,
+    _stop_event: threading.Event | None = None,
+    _ready_callback: Callable[[int], None] | None = None,
 ) -> None:
     """
     Start the pbspy-server daemon.
 
-    Runs in the foreground; the caller is responsible for daemonising the
-    process (e.g. ``--daemon`` in :mod:`pbspy_server.__main__` forks and
-    calls this in the child).
+    Runs in the foreground; use your OS's service manager (systemd, nohup,
+    etc.) to run it as a background service.
 
-    The server binds a TCP port on ``0.0.0.0`` (OS chooses a free port) and
-    writes a JSON address file to *addr_path* containing the hostname, port,
-    and a random auth token.  Clients must send the token as the first frame
-    on every connection; connections with an incorrect or missing token are
-    rejected immediately.
-
-    Job state is held in memory for the daemon's lifetime and is not
-    persisted across restarts.
+    When *ssh_host* is provided, all PBS operations (qsub, qstat, file reads)
+    are executed on that host via SSH.  Otherwise they run locally.
 
     Args:
-        addr_path: Path for the address file (JSON). Defaults to
-            ``~/.pbspy/server.addr``.
-        poll_interval: Seconds between qstat polls (default 60). Override in tests.
+        host: Local address to bind (default ``"0.0.0.0"``).
+        port: TCP port to listen on (default 9876; pass 0 for OS-assigned).
+        ssh_host: Supercomputer hostname to SSH into for PBS commands.
+        ssh_user: SSH username (combined with *ssh_host* as ``user@host``).
+        ssh_args: Extra arguments forwarded to the ``ssh`` command.
+        poll_interval: Seconds between qstat polls (default 60).
     """
-    addr_path.parent.mkdir(parents=True, exist_ok=True)
-    if addr_path.exists():
-        addr_path.unlink()
+    ssh_prefix: list[str] | None = None
+    if ssh_host is not None:
+        destination = f"{ssh_user}@{ssh_host}" if ssh_user else ssh_host
+        ssh_prefix = ["ssh", *(ssh_args or []), destination]
 
-    token = secrets.token_hex(32)
-    state = _ServerState(token=token)
+    runner = core.PBSRunner(ssh_prefix)
+    state = _ServerState(runner=runner)
 
-    stop_event = threading.Event()
+    stop_event = _stop_event or threading.Event()
+
     poll_thread = threading.Thread(
         target=_poll_loop, args=(state, stop_event), kwargs={"poll_interval": poll_interval}, daemon=True
     )
     poll_thread.start()
 
-    # Signal handlers can only be registered from the main thread.
     if threading.current_thread() is threading.main_thread():
 
         def _handle_signal(signum: int, frame: object) -> None:
@@ -279,15 +237,17 @@ def run_server(
 
     srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    srv.bind(("", 0))
+    srv.bind((host, port))
     srv.listen(16)
     srv.settimeout(1.0)
 
-    hostname = socket.gethostname()
-    port = srv.getsockname()[1]
-    addr_path.write_text(json.dumps({"host": hostname, "port": port, "token": token}))
+    actual_port = srv.getsockname()[1]
+    logger.info("pbspy-server listening on %s:%d", host, actual_port)
+    if ssh_host:
+        logger.info("PBS commands will run via SSH on %s", destination)
 
-    logger.info("pbspy-server listening on %s:%d", hostname, port)
+    if _ready_callback is not None:
+        _ready_callback(actual_port)
 
     try:
         while not stop_event.is_set():
@@ -295,11 +255,9 @@ def run_server(
                 conn, _ = srv.accept()
             except TimeoutError:
                 continue
-            t = threading.Thread(target=_handle_connection, args=(conn, state, stop_event), daemon=True)
+            t = threading.Thread(target=_handle_connection, args=(conn, state), daemon=True)
             t.start()
     finally:
         srv.close()
-        if addr_path.exists():
-            addr_path.unlink()
         _cancel_all_subscriptions(state)
         logger.info("pbspy-server stopped")

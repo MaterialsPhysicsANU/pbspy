@@ -3,7 +3,7 @@ from collections.abc import Callable
 
 import pytest
 
-from pbspy import Backend, Job, JobDescription, JobResult, LocalBackend, SSHBackend
+from pbspy import Backend, Job, JobDescription, JobResult, LocalBackend, ServerBackend
 
 
 @pytest.mark.skipif(shutil.which("qsub") is None, reason="qsub not available")
@@ -124,6 +124,6 @@ def test_script_generation_unchanged() -> None:
 
 
 def test_backend_classes_importable() -> None:
-    """Backend, LocalBackend, SSHBackend are importable from pbspy."""
+    """Backend, LocalBackend, ServerBackend are importable from pbspy."""
     assert issubclass(LocalBackend, Backend)
-    assert issubclass(SSHBackend, Backend)
+    assert issubclass(ServerBackend, Backend)

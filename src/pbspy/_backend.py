@@ -2,7 +2,7 @@
 Backend abstract base class.
 
 Concrete backends: :class:`~pbspy._local_backend.LocalBackend` (default,
-in-process) and :class:`~pbspy._ssh_backend.SSHBackend` (remote via SSH).
+in-process) and :class:`~pbspy._server_backend.ServerBackend` (remote via TCP).
 """
 
 from __future__ import annotations

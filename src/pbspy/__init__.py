@@ -9,7 +9,7 @@ from typing import Any, Self, TypeAlias
 
 from pbspy._backend import Backend
 from pbspy._local_backend import LocalBackend
-from pbspy._ssh_backend import SSHBackend
+from pbspy._server_backend import ServerBackend
 
 # Shared LocalBackend instance so all locally-submitted jobs are grouped together
 # when calling Job.wait_all() / Job.result_all(), restoring concurrent polling.
@@ -23,7 +23,7 @@ __all__ = [
     "QueueLimitsMap",
     "Backend",
     "LocalBackend",
-    "SSHBackend",
+    "ServerBackend",
     "gadi",
 ]
 
@@ -248,8 +248,8 @@ class JobDescription:
         Args:
             backend: The backend to use for submission.  Defaults to
                 :class:`~pbspy.LocalBackend` (runs ``qsub`` locally).
-                Pass a :class:`~pbspy.SSHBackend` instance to submit to a
-                remote supercomputer over SSH.
+                Pass a :class:`~pbspy.ServerBackend` instance to submit via
+                a pbspy-server daemon.
         """
         if backend is None:
             backend = LocalBackend()

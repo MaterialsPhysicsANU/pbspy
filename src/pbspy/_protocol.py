@@ -2,9 +2,9 @@
 Request and response dataclasses for the pbspy client-server protocol.
 
 Messages are exchanged as length-prefixed pickle frames (see :func:`send_frame`
-and :func:`recv_frame`).  :class:`~pbspy._local_backend.LocalBackend` uses the
-same dataclasses but never pickles them — it calls :mod:`pbspy._pbs_core`
-directly and passes Python objects in-process.
+and :func:`recv_frame`).  Connections require no authentication — the server
+is expected to run on a trusted machine with network access restricted to
+authorised clients.
 """
 
 from __future__ import annotations
@@ -20,13 +20,11 @@ if TYPE_CHECKING:
 
 __all__ = [
     # Requests
-    "AuthRequest",
     "SubmitRequest",
     "WaitRequest",
     "ResultRequest",
     "PingRequest",
     # Responses
-    "AuthOkResponse",
     "SubmittedResponse",
     "StatusUpdateResponse",
     "WaitDoneResponse",
@@ -44,18 +42,6 @@ _FRAME_HEADER = struct.Struct("!I")  # 4-byte big-endian unsigned int
 # ---------------------------------------------------------------------------
 # Requests
 # ---------------------------------------------------------------------------
-
-
-@dataclass
-class AuthRequest:
-    """
-    Authentication handshake — must be the first frame sent on every connection.
-
-    The server responds with :class:`AuthOkResponse` on success or
-    :class:`ErrorResponse` (and closes the connection) on failure.
-    """
-
-    token: str
 
 
 @dataclass
@@ -91,11 +77,6 @@ class PingRequest:
 # ---------------------------------------------------------------------------
 # Responses
 # ---------------------------------------------------------------------------
-
-
-@dataclass
-class AuthOkResponse:
-    """Returned after a successful :class:`AuthRequest`."""
 
 
 @dataclass

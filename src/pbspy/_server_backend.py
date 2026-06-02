@@ -1,16 +1,13 @@
 """
-SSHBackend: communicates with a remote pbspy-server daemon over SSH.
+ServerBackend: communicates with a pbspy-server daemon over a plain TCP connection.
 
-The backend opens an SSH subprocess running ``pbspy-server --proxy`` on the
-remote host.  Messages are exchanged as length-prefixed pickle frames (see
-:mod:`pbspy._protocol`).  The proxy on the remote end automatically starts the
-daemon if it is not already running (emacsclient-style).
+Messages are exchanged as length-prefixed pickle frames (see :mod:`pbspy._protocol`).
+The server handles all SSH communication to the supercomputer internally.
 """
 
 from __future__ import annotations
 
-import select
-import subprocess
+import socket
 import threading
 from collections.abc import Callable
 from typing import TYPE_CHECKING, BinaryIO, cast
@@ -21,27 +18,33 @@ from pbspy._backend import Backend
 if TYPE_CHECKING:
     from pbspy import Job
 
-__all__ = ["SSHBackend"]
+__all__ = ["ServerBackend"]
 
 
-class SSHBackend(Backend):
+class ServerBackend(Backend):
     """
-    Backend that submits and tracks PBS jobs on a remote supercomputer via SSH.
+    Backend that connects to a pbspy-server daemon over TCP.
+
+    The server (started with ``pbspy-server``) runs on any machine with SSH
+    access to the supercomputer; this client connects to it directly.
 
     Args:
-        host: SSH destination (e.g. ``"user@gadi.nci.org.au"``).
-            Any option accepted by ``ssh`` (host aliases, ``-i``, etc.) works
-            because the system ``ssh`` binary is used.
-        ssh_args: Extra arguments forwarded to the ``ssh`` command (e.g.
-            ``["-i", "/path/to/key"]``).
+        host: Hostname or IP address of the machine running pbspy-server.
+        port: TCP port the server is listening on (default: 9876).
+        connect_timeout: Seconds to wait for the initial TCP connection.
     """
 
-    def __init__(self, host: str, ssh_args: list[str] | None = None) -> None:
+    def __init__(
+        self,
+        host: str,
+        port: int = 9876,
+        connect_timeout: float = 10.0,
+    ) -> None:
         self._host = host
-        self._ssh_args = ssh_args or []
-        self._proc: subprocess.Popen[bytes] | None = None
-        self._stdin: BinaryIO | None = None
-        self._stdout: BinaryIO | None = None
+        self._port = port
+        self._connect_timeout = connect_timeout
+        self._sock: socket.socket | None = None
+        self._stream: BinaryIO | None = None
         self._lock = threading.Lock()
         self._connect()
 
@@ -59,11 +62,6 @@ class SSHBackend(Backend):
         on_update: Callable[[str, str | None], None] | None = None,
         progress: bool = True,
     ) -> None:
-        """
-        Send a WaitRequest and stream StatusUpdateResponse frames until
-        WaitDoneResponse is received.  Optionally shows a progress display.
-        """
-
         if progress:
             self._wait_with_progress(jobs, on_update)
         else:
@@ -78,80 +76,67 @@ class SSHBackend(Backend):
         return response.result
 
     def _connect(self) -> None:
-        """Start the SSH subprocess and verify the proxy is alive."""
-        cmd = ["ssh", *self._ssh_args, self._host, "pbspy-server", "--proxy"]
-        self._proc = subprocess.Popen(
-            cmd,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        assert self._proc.stdin is not None
-        assert self._proc.stdout is not None
-        self._stdin = cast(BinaryIO, self._proc.stdin)
-        self._stdout = cast(BinaryIO, self._proc.stdout)
+        """Open a TCP connection to the server and verify liveness with a ping."""
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(self._connect_timeout)
+        try:
+            sock.connect((self._host, self._port))
+        except OSError as exc:
+            sock.close()
+            raise RuntimeError(f"Could not connect to pbspy-server at {self._host}:{self._port}: {exc}") from exc
+        sock.settimeout(None)
+        self._sock = sock
+        self._stream = cast(BinaryIO, sock.makefile("rwb", buffering=0))
 
         try:
-            pong = self._rpc(proto.PingRequest())
+            proto.send_frame(self._stream, proto.PingRequest())
+            pong = proto.recv_frame(self._stream)
         except (OSError, EOFError) as exc:
-            stderr_text = self._read_stderr()
-            raise RuntimeError(
-                f"pbspy-server --proxy did not respond to ping on {self._host!r}: {exc}"
-                + (f"\nSSH stderr: {stderr_text}" if stderr_text else "")
-            ) from exc
+            self._stream.close()
+            sock.close()
+            raise RuntimeError(f"pbspy-server at {self._host}:{self._port} did not respond to ping: {exc}") from exc
         if not isinstance(pong, proto.PongResponse):
-            stderr_text = self._read_stderr()
-            raise RuntimeError(
-                f"pbspy-server --proxy returned unexpected response: {pong!r}"
-                + (f"\nSSH stderr: {stderr_text}" if stderr_text else "")
-            )
-
-    def _read_stderr(self) -> str:
-        """Non-blocking read of any immediately available stderr from the SSH process."""
-        if self._proc is None or self._proc.stderr is None:
-            return ""
-        try:
-            rlist, _, _ = select.select([self._proc.stderr], [], [], 0.0)
-            if rlist:
-                return self._proc.stderr.read(4096).decode(errors="replace")
-        except OSError:
-            pass
-        return ""
+            self._stream.close()
+            sock.close()
+            raise RuntimeError(f"pbspy-server returned unexpected response to ping: {pong!r}")
 
     def _reconnect(self) -> None:
-        """Terminate the current SSH subprocess and establish a fresh connection."""
-        if self._proc is not None:
+        """Close the current connection and establish a fresh one."""
+        if self._stream is not None:
             try:
-                self._proc.terminate()
+                self._stream.close()
             except OSError:
                 pass
-            self._proc = None
+            self._stream = None
+        if self._sock is not None:
+            try:
+                self._sock.close()
+            except OSError:
+                pass
+            self._sock = None
         self._connect()
 
     def _rpc(self, request: object) -> object:
         """Send one request frame and return the first response frame."""
         with self._lock:
             try:
-                assert self._stdin is not None
-                assert self._stdout is not None
-                proto.send_frame(self._stdin, request)
-                return proto.recv_frame(self._stdout)
+                assert self._stream is not None
+                proto.send_frame(self._stream, request)
+                return proto.recv_frame(self._stream)
             except (OSError, EOFError):
-                # Connection lost — attempt one reconnect then retry.
                 self._reconnect()
-                assert self._stdin is not None
-                assert self._stdout is not None
-                proto.send_frame(self._stdin, request)
-                return proto.recv_frame(self._stdout)
+                assert self._stream is not None
+                proto.send_frame(self._stream, request)
+                return proto.recv_frame(self._stream)
 
     def _send(self, request: object) -> None:
         with self._lock:
-            assert self._stdin is not None
-            proto.send_frame(self._stdin, request)
+            assert self._stream is not None
+            proto.send_frame(self._stream, request)
 
     def _recv(self) -> object:
-        assert self._stdout is not None
-        return proto.recv_frame(self._stdout)
+        assert self._stream is not None
+        return proto.recv_frame(self._stream)
 
     def _wait_quiet(
         self,
@@ -214,10 +199,18 @@ class SSHBackend(Backend):
                     raise RuntimeError(f"Server error while waiting: {response.message}")
 
     def close(self) -> None:
-        """Terminate the SSH subprocess."""
-        if self._proc is not None:
-            self._proc.terminate()
-            self._proc = None
+        if self._stream is not None:
+            try:
+                self._stream.close()
+            except OSError:
+                pass
+            self._stream = None
+        if self._sock is not None:
+            try:
+                self._sock.close()
+            except OSError:
+                pass
+            self._sock = None
 
     def __del__(self) -> None:
         try:

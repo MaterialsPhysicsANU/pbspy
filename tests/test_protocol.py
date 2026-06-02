@@ -28,13 +28,6 @@ def roundtrip(obj: object) -> object:
 # ---------------------------------------------------------------------------
 
 
-def test_roundtrip_auth_request() -> None:
-    req = proto.AuthRequest(token="abc123secret")
-    result = roundtrip(req)
-    assert isinstance(result, proto.AuthRequest)
-    assert result.token == "abc123secret"
-
-
 def test_roundtrip_ping() -> None:
     result = roundtrip(proto.PingRequest())
     assert isinstance(result, proto.PingRequest)
@@ -74,10 +67,6 @@ def test_roundtrip_result_request() -> None:
 # ---------------------------------------------------------------------------
 # Response types
 # ---------------------------------------------------------------------------
-
-
-def test_roundtrip_auth_ok() -> None:
-    assert isinstance(roundtrip(proto.AuthOkResponse()), proto.AuthOkResponse)
 
 
 def test_roundtrip_pong() -> None:

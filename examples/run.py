@@ -1,11 +1,11 @@
 import typer
 from rich import print
 
-from pbspy import Job, JobDescription, QueueLimits, SSHBackend
+from pbspy import Job, JobDescription, QueueLimits, ServerBackend
 
 
 def main(remote: str = "") -> None:
-    backend = SSHBackend(remote) if remote else None
+    backend = ServerBackend(remote) if remote else None
 
     # Run a job with some explicit parameters
     job_a = (
