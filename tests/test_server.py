@@ -1,5 +1,5 @@
 """
-Integration tests for pbspy_server.server.
+Integration tests for pbspy.server.
 
 Spins up a real server (in a background thread) with mocked PBS operations so
 that no ``qsub``/``qstat`` installation is needed.
@@ -19,7 +19,7 @@ import pytest
 
 import pbspy._protocol as proto
 from pbspy import Job, JobResult
-from pbspy_server.server import run_server
+from pbspy.server import run_server
 
 # ---------------------------------------------------------------------------
 # Fixture: running server
@@ -61,21 +61,21 @@ class ServerHandle:
 @pytest.fixture()
 def mock_pbs_submit() -> Generator[MagicMock, None, None]:
     """Patch pbs_submit to return a fake job without calling qsub."""
-    with patch("pbspy_server.server.core.pbs_submit", return_value=("100.mock", "test_job")) as m:
+    with patch("pbspy.server.server.core.pbs_submit", return_value=("100.mock", "test_job")) as m:
         yield m
 
 
 @pytest.fixture()
 def mock_check_finished() -> Generator[MagicMock, None, None]:
     """Patch _check_job_finished to report jobs as never finished (default)."""
-    with patch("pbspy_server.server._check_job_finished", return_value=None) as m:
+    with patch("pbspy.server.server._check_job_finished", return_value=None) as m:
         yield m
 
 
 @pytest.fixture()
 def mock_pbs_get_result() -> Generator[MagicMock, None, None]:
     with patch(
-        "pbspy_server.server.core.pbs_get_result",
+        "pbspy.server.server.core.pbs_get_result",
         return_value=JobResult(exit_code=0, output="hello\n"),
     ) as m:
         yield m
@@ -149,10 +149,10 @@ def test_wait_already_finished_returns_immediately() -> None:
 
     def _run() -> None:
         with (
-            patch("pbspy_server.server.core.pbs_submit", return_value=("done.mock", "done_job")),
+            patch("pbspy.server.server.core.pbs_submit", return_value=("done.mock", "done_job")),
             # Return 0 immediately so the very first poll marks the job finished.
-            patch("pbspy_server.server._check_job_finished", return_value=0),
-            patch("pbspy_server.server.core.pbs_get_result", return_value=JobResult(exit_code=0)),
+            patch("pbspy.server.server._check_job_finished", return_value=0),
+            patch("pbspy.server.server.core.pbs_get_result", return_value=JobResult(exit_code=0)),
         ):
             run_server(port=0, poll_interval=0.1, _ready_callback=port_q.put, _stop_event=stop)
 

@@ -49,7 +49,7 @@ def main() -> None:
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-    from pbspy_server.server import run_server
+    from pbspy.server import run_server
 
     run_server(
         port=args.port,

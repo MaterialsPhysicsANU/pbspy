@@ -211,6 +211,7 @@ def run_server(
         ssh_args: Extra arguments forwarded to the ``ssh`` command.
         poll_interval: Seconds between qstat polls (default 60).
     """
+    destination: str | None = None
     ssh_prefix: list[str] | None = None
     if ssh_host is not None:
         destination = f"{ssh_user}@{ssh_host}" if ssh_user else ssh_host
