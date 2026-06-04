@@ -66,6 +66,12 @@ class Job:
     backend: Backend = field(default=_DEFAULT_LOCAL_BACKEND, repr=False, compare=False)
     """The backend used to submit and track this job."""
 
+    output_path: str | None = None
+    """Custom path for the job's stdout output file (``#PBS -o``), if any."""
+
+    error_path: str | None = None
+    """Custom path for the job's stderr error file (``#PBS -e``), if any."""
+
     def __getstate__(self) -> dict[str, Any]:
         """Exclude backend from pickling (it carries live sockets)."""
         state = self.__dict__.copy()
@@ -271,4 +277,11 @@ class JobDescription:
         if self.name is None:
             self.name = job_name
 
-        return Job(job_name=job_name, job_id=job_id, description=self.description, backend=backend)
+        return Job(
+            job_name=job_name,
+            job_id=job_id,
+            description=self.description,
+            backend=backend,
+            output_path=self.output_path,
+            error_path=self.error_path,
+        )

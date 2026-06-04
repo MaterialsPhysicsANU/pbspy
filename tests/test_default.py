@@ -1,5 +1,6 @@
 import pickle
 import shutil
+import subprocess
 from collections.abc import Callable
 
 import pytest
@@ -160,4 +161,125 @@ def test_job_pickle_excludes_backend_from_state() -> None:
     job = Job(job_id="1.mock", backend=LocalBackend())
     state = job.__getstate__()
     assert "backend" not in state
-    assert state == {"job_name": None, "job_id": "1.mock", "description": None}
+    assert state == {
+        "job_name": None,
+        "job_id": "1.mock",
+        "description": None,
+        "output_path": None,
+        "error_path": None,
+    }
+
+
+def test_submit_carries_output_and_error_paths() -> None:
+    """JobDescription.submit() propagates output_path/error_path to the returned Job."""
+    mock = _MockBackend()
+    jd = JobDescription(
+        name="test_job",
+        output_path="/scratch/project/job.out",
+        error_path="/scratch/project/job.err",
+    )
+    jd.add_command(["echo", "hello"])
+
+    job = jd.submit(backend=mock)
+
+    assert job.output_path == "/scratch/project/job.out"
+    assert job.error_path == "/scratch/project/job.err"
+
+
+def test_submit_default_paths_are_none() -> None:
+    """When output_path/error_path are not set, Job gets None for both."""
+    mock = _MockBackend()
+    jd = JobDescription(name="test_job")
+    jd.add_command(["echo", "hello"])
+
+    job = jd.submit(backend=mock)
+
+    assert job.output_path is None
+    assert job.error_path is None
+
+
+def test_pbs_get_result_uses_custom_paths() -> None:
+    """pbs_get_result reads from custom output_path/error_path when set."""
+    from pbspy._pbs_core import PBSRunner, pbs_get_result
+
+    class _FileTrackingRunner(PBSRunner):
+        def __init__(self) -> None:
+            super().__init__()
+            self.read_paths: list[str] = []
+
+        def read_file(self, path: str) -> str:
+            self.read_paths.append(path)
+            if "out" in path:
+                return "custom stdout\n"
+            return "custom stderr\n"
+
+        def run(self, cmd: list[str], *, input: bytes | None = None) -> subprocess.CompletedProcess[bytes]:
+            # Override to avoid real qstat calls
+            return subprocess.CompletedProcess(cmd, 0, stdout=b"", stderr=b"")
+
+    runner = _FileTrackingRunner()
+    job = Job(
+        job_id="123.mock",
+        job_name="myjob",
+        output_path="/scratch/job.out",
+        error_path="/scratch/job.err",
+    )
+
+    result = pbs_get_result(job, runner=runner)
+
+    # Should read from custom paths, not default names
+    assert "/scratch/job.out" in runner.read_paths
+    assert "/scratch/job.err" in runner.read_paths
+    assert result.output == "custom stdout\n"
+    assert result.error == "custom stderr\n"
+
+
+def test_pbs_get_result_uses_default_paths_when_none() -> None:
+    """pbs_get_result falls back to {job_name}.o{job_id} when paths are None."""
+    from pbspy._pbs_core import PBSRunner, pbs_get_result
+
+    class _FileTrackingRunner(PBSRunner):
+        def __init__(self) -> None:
+            super().__init__()
+            self.read_paths: list[str] = []
+
+        def read_file(self, path: str) -> str:
+            self.read_paths.append(path)
+            return ""
+
+        def run(self, cmd: list[str], *, input: bytes | None = None) -> subprocess.CompletedProcess[bytes]:
+            return subprocess.CompletedProcess(cmd, 0, stdout=b"", stderr=b"")
+
+    runner = _FileTrackingRunner()
+    job = Job(
+        job_id="456.mock",
+        job_name="defaultjob",
+        output_path=None,
+        error_path=None,
+    )
+
+    result = pbs_get_result(job, runner=runner)
+
+    assert "defaultjob.o456" in runner.read_paths
+    assert "defaultjob.e456" in runner.read_paths
+    assert result.output == ""
+    assert result.error == ""
+
+
+def test_job_pickle_preserves_output_and_error_paths() -> None:
+    """Job pickle round-trip preserves output_path and error_path."""
+    job = Job(
+        job_id="789.mock",
+        job_name="my_job",
+        output_path="/scratch/project/job.out",
+        error_path="/scratch/project/job.err",
+        backend=LocalBackend(),
+    )
+
+    data = pickle.dumps(job)
+    restored = pickle.loads(data)
+
+    assert restored.output_path == "/scratch/project/job.out"
+    assert restored.error_path == "/scratch/project/job.err"
+    assert restored.job_id == "789.mock"
+    assert restored.job_name == "my_job"

@@ -84,7 +84,7 @@ def pbs_submit(script: str, name: str | None, runner: PBSRunner = _LOCAL_RUNNER)
     """
     process = runner.run(["qsub"], input=script.encode("utf-8"))
     if process.returncode != 0:
-        raise RuntimeError(f'Failed to submit job: {process.stderr.strip().decode("utf-8")}')
+        raise RuntimeError(f"Failed to submit job: {process.stderr.strip().decode('utf-8')}")
     job_id = process.stdout.strip().decode("utf-8")
     if name is None:
         name = _get_job_name(job_id, runner)
@@ -133,8 +133,8 @@ def pbs_get_result(job: Job, runner: PBSRunner = _LOCAL_RUNNER) -> JobResult:
     from pbspy import JobResult
 
     job_id_num = job.job_id.split(".")[0]
-    output_file = f"{job.job_name}.o{job_id_num}"
-    error_file = f"{job.job_name}.e{job_id_num}"
+    output_file = job.output_path or f"{job.job_name}.o{job_id_num}"
+    error_file = job.error_path or f"{job.job_name}.e{job_id_num}"
 
     try:
         output = runner.read_file(output_file)
