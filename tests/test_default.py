@@ -1,3 +1,4 @@
+import pickle
 import shutil
 from collections.abc import Callable
 
@@ -127,3 +128,36 @@ def test_backend_classes_importable() -> None:
     """Backend, LocalBackend, ServerBackend are importable from pbspy."""
     assert issubclass(LocalBackend, Backend)
     assert issubclass(ServerBackend, Backend)
+
+
+def test_job_pickle_round_trip() -> None:
+    """Job pickle round-trip excludes backend and restores all other fields.
+
+    Regression test: Job.backend carries live sockets (ServerBackend) and
+    must not be pickled.  See __getstate__/__setstate__ on Job.
+    """
+    job = Job(
+        job_id="42.mock",
+        job_name="my_job",
+        description="some description",
+        backend=LocalBackend(),
+    )
+
+    # Pickle and unpickle
+    data = pickle.dumps(job)
+    restored = pickle.loads(data)
+
+    # All non-backend fields preserved
+    assert restored.job_id == "42.mock"
+    assert restored.job_name == "my_job"
+    assert restored.description == "some description"
+    # backend is restored to the default local backend (never pickled)
+    assert isinstance(restored.backend, LocalBackend)
+
+
+def test_job_pickle_excludes_backend_from_state() -> None:
+    """__getstate__ does not include the backend attribute."""
+    job = Job(job_id="1.mock", backend=LocalBackend())
+    state = job.__getstate__()
+    assert "backend" not in state
+    assert state == {"job_name": None, "job_id": "1.mock", "description": None}

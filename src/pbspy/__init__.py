@@ -66,6 +66,17 @@ class Job:
     backend: Backend = field(default=_DEFAULT_LOCAL_BACKEND, repr=False, compare=False)
     """The backend used to submit and track this job."""
 
+    def __getstate__(self) -> dict[str, Any]:
+        """Exclude backend from pickling (it carries live sockets)."""
+        state = self.__dict__.copy()
+        del state["backend"]
+        return state
+
+    def __setstate__(self, state: dict[str, Any]) -> None:
+        """Restore job state, assigning the default local backend."""
+        self.__dict__.update(state)
+        self.backend = _DEFAULT_LOCAL_BACKEND
+
     def wait(self, progress: bool = True) -> None:
         """
         Wait for the job to complete.
