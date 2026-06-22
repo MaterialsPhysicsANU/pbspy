@@ -4,6 +4,7 @@ pbspy-server command-line entry point.
 Usage::
 
     pbspy-server [--ssh-host HOST] [--ssh-user USER] [--port PORT] [--ssh-arg ARG ...]
+                 [--api-key KEY] [--allow-exec]
 """
 
 from __future__ import annotations
@@ -44,6 +45,18 @@ def main() -> None:
         metavar="ARG",
         help="Extra SSH argument (may be repeated, e.g. --ssh-arg=-i --ssh-arg=/path/to/key).",
     )
+    parser.add_argument(
+        "--api-key",
+        metavar="KEY",
+        default=os.environ.get("PBSPY_API_KEY"),
+        help="Require clients to authenticate with this key (env: PBSPY_API_KEY).",
+    )
+    parser.add_argument(
+        "--allow-exec",
+        action="store_true",
+        default=os.environ.get("PBSPY_ALLOW_EXEC", "").lower() in ("1", "true", "yes"),
+        help="Allow clients to execute arbitrary SSH commands (env: PBSPY_ALLOW_EXEC; disabled by default).",
+    )
 
     args = parser.parse_args()
 
@@ -56,6 +69,8 @@ def main() -> None:
         ssh_host=args.ssh_host,
         ssh_user=args.ssh_user,
         ssh_args=args.ssh_args,
+        api_key=args.api_key,
+        allow_exec=args.allow_exec,
     )
 
 

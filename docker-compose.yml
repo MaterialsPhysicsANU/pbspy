@@ -8,3 +8,5 @@ services:
     environment:
       - PBSPY_SSH_HOST=${SSH_HOST}
       - PBSPY_SSH_USER=${SSH_USER:-}
+      - PBSPY_API_KEY=${PBSPY_API_KEY:-}
+      - PBSPY_ALLOW_EXEC=${PBSPY_ALLOW_EXEC:-}

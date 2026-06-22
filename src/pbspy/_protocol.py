@@ -2,9 +2,10 @@
 Request and response dataclasses for the pbspy client-server protocol.
 
 Messages are exchanged as length-prefixed pickle frames (see :func:`send_frame`
-and :func:`recv_frame`).  Connections require no authentication — the server
-is expected to run on a trusted machine with network access restricted to
-authorised clients.
+and :func:`recv_frame`).  Connections optionally require authentication via an
+API key (see :class:`AuthRequest`).  When enabled, the server sends an
+:class:`AuthOkResponse` on success or an :class:`ErrorResponse` on failure
+before accepting any other requests.
 """
 
 from __future__ import annotations
@@ -20,17 +21,21 @@ if TYPE_CHECKING:
 
 __all__ = [
     # Requests
+    "AuthRequest",
     "SubmitRequest",
     "WaitRequest",
     "ResultRequest",
     "PingRequest",
+    "ExecRequest",
     # Responses
+    "AuthOkResponse",
     "SubmittedResponse",
     "StatusUpdateResponse",
     "WaitDoneResponse",
     "ResultResponse",
     "PongResponse",
     "ErrorResponse",
+    "ExecResponse",
     # Framing
     "send_frame",
     "recv_frame",
@@ -67,6 +72,13 @@ class ResultRequest:
     """Ask the server to return the result of a completed job."""
 
     job: Job
+
+
+@dataclass
+class AuthRequest:
+    """Sent as the first frame on connection when the server requires API key auth."""
+
+    api_key: str | None = None
 
 
 @dataclass
@@ -120,10 +132,32 @@ class PongResponse:
 
 
 @dataclass
+class AuthOkResponse:
+    """Sent after a successful :class:`AuthRequest`."""
+
+
+@dataclass
+class ExecRequest:
+    """Ask the server to execute an arbitrary command via SSH."""
+
+    command: list[str]
+    stdin: bytes | None = None
+
+
+@dataclass
 class ErrorResponse:
     """Returned when the server encounters an error handling a request."""
 
     message: str
+
+
+@dataclass
+class ExecResponse:
+    """Returned after a successful :class:`ExecRequest`."""
+
+    returncode: int
+    stdout: bytes
+    stderr: bytes
 
 
 # ---------------------------------------------------------------------------

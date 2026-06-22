@@ -56,8 +56,10 @@ class _WaitSubscription:
 class _ServerState:
     """Shared mutable state accessed by both connection threads and the poll thread."""
 
-    def __init__(self, runner: core.PBSRunner) -> None:
+    def __init__(self, runner: core.PBSRunner, api_key: str | None = None, allow_exec: bool = False) -> None:
         self.runner = runner
+        self.api_key = api_key
+        self.allow_exec = allow_exec
         self.lock = threading.Lock()
         self.jobs: dict[str, _JobRecord] = {}
         self.subscriptions: dict[str, list[_WaitSubscription]] = {}
@@ -128,6 +130,17 @@ def _handle_connection(conn: socket.socket, state: _ServerState) -> None:
     """Handle a single client connection in its own thread."""
     stream = cast(BinaryIO, conn.makefile("rwb", buffering=0))
     try:
+        # Auth pre-check (runs before any other request)
+        if state.api_key is not None:
+            try:
+                first = proto.recv_frame(stream)
+            except EOFError:
+                return
+            if not isinstance(first, proto.AuthRequest) or first.api_key != state.api_key:
+                proto.send_frame(stream, proto.ErrorResponse(message="Authentication failed"))
+                return
+            proto.send_frame(stream, proto.AuthOkResponse())
+
         while True:
             try:
                 request = proto.recv_frame(stream)
@@ -170,6 +183,25 @@ def _handle_connection(conn: socket.socket, state: _ServerState) -> None:
                     result: JobResult = core.pbs_get_result(request.job, runner=state.runner)
                     proto.send_frame(stream, proto.ResultResponse(job=request.job, result=result))
 
+                elif isinstance(request, proto.AuthRequest):
+                    proto.send_frame(stream, proto.AuthOkResponse())
+
+                elif isinstance(request, proto.ExecRequest):
+                    if not state.allow_exec:
+                        proto.send_frame(
+                            stream, proto.ErrorResponse(message="SSH command execution is disabled on this server")
+                        )
+                    else:
+                        exec_result = state.runner.run(request.command, input=request.stdin)
+                        proto.send_frame(
+                            stream,
+                            proto.ExecResponse(
+                                returncode=exec_result.returncode,
+                                stdout=exec_result.stdout,
+                                stderr=exec_result.stderr,
+                            ),
+                        )
+
                 else:
                     proto.send_frame(stream, proto.ErrorResponse(message=f"Unknown request type: {type(request)}"))
 
@@ -191,6 +223,8 @@ def run_server(
     ssh_user: str | None = None,
     ssh_args: list[str] | None = None,
     poll_interval: float = _POLL_INTERVAL,
+    api_key: str | None = None,
+    allow_exec: bool = False,
     _stop_event: threading.Event | None = None,
     _ready_callback: Callable[[int], None] | None = None,
 ) -> None:
@@ -210,6 +244,10 @@ def run_server(
         ssh_user: SSH username (combined with *ssh_host* as ``user@host``).
         ssh_args: Extra arguments forwarded to the ``ssh`` command.
         poll_interval: Seconds between qstat polls (default 60).
+        api_key: When set, clients must send a matching :class:`~pbspy._protocol.AuthRequest`
+            as the first frame or the connection is rejected.
+        allow_exec: When ``True``, clients may send :class:`~pbspy._protocol.ExecRequest`
+            to run arbitrary commands via the server's SSH runner.  Disabled by default.
     """
     destination: str | None = None
     ssh_prefix: list[str] | None = None
@@ -218,7 +256,7 @@ def run_server(
         ssh_prefix = ["ssh", *(ssh_args or []), destination]
 
     runner = core.PBSRunner(ssh_prefix)
-    state = _ServerState(runner=runner)
+    state = _ServerState(runner=runner, api_key=api_key, allow_exec=allow_exec)
 
     stop_event = _stop_event or threading.Event()
 
@@ -246,6 +284,9 @@ def run_server(
     logger.info("pbspy-server listening on %s:%d", host, actual_port)
     if ssh_host:
         logger.info("PBS commands will run via SSH on %s", destination)
+
+    if allow_exec:
+        logger.warning("SSH command execution is enabled (--allow-exec)")
 
     if _ready_callback is not None:
         _ready_callback(actual_port)

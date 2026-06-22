@@ -102,6 +102,60 @@ def server(
     t.join(timeout=2.0)
 
 
+@pytest.fixture()
+def server_with_key(
+    mock_pbs_submit: MagicMock,
+    mock_check_finished: MagicMock,
+    mock_pbs_get_result: MagicMock,
+) -> Generator[ServerHandle, None, None]:
+    port_q: queue.SimpleQueue[int] = queue.SimpleQueue()
+    stop = threading.Event()
+
+    t = threading.Thread(
+        target=run_server,
+        kwargs={
+            "port": 0,
+            "poll_interval": 0.1,
+            "api_key": "secret",
+            "_ready_callback": port_q.put,
+            "_stop_event": stop,
+        },
+        daemon=True,
+    )
+    t.start()
+    port = port_q.get(timeout=_WAIT_TIMEOUT)
+    yield ServerHandle("127.0.0.1", port)
+    stop.set()
+    t.join(timeout=2.0)
+
+
+@pytest.fixture()
+def server_with_exec(
+    mock_pbs_submit: MagicMock,
+    mock_check_finished: MagicMock,
+    mock_pbs_get_result: MagicMock,
+) -> Generator[ServerHandle, None, None]:
+    port_q: queue.SimpleQueue[int] = queue.SimpleQueue()
+    stop = threading.Event()
+
+    t = threading.Thread(
+        target=run_server,
+        kwargs={
+            "port": 0,
+            "poll_interval": 0.1,
+            "allow_exec": True,
+            "_ready_callback": port_q.put,
+            "_stop_event": stop,
+        },
+        daemon=True,
+    )
+    t.start()
+    port = port_q.get(timeout=_WAIT_TIMEOUT)
+    yield ServerHandle("127.0.0.1", port)
+    stop.set()
+    t.join(timeout=2.0)
+
+
 # ---------------------------------------------------------------------------
 # Ping / pong
 # ---------------------------------------------------------------------------
@@ -213,3 +267,81 @@ def test_wait_receives_status_update_then_done(server: ServerHandle, mock_check_
     stream.close()
 
     assert any(isinstance(r, proto.WaitDoneResponse) for r in responses), f"Expected WaitDoneResponse; got: {responses}"
+
+
+# ---------------------------------------------------------------------------
+# Auth tests
+# ---------------------------------------------------------------------------
+
+
+def test_auth_required_with_api_key(server_with_key: ServerHandle) -> None:
+    """Connecting without sending AuthRequest first should fail."""
+    stream = server_with_key.connect()
+    # Send a PingRequest directly (no auth)
+    proto.send_frame(stream, proto.PingRequest())
+    response = proto.recv_frame(stream)
+    stream.close()
+    assert isinstance(response, proto.ErrorResponse)
+    assert "Authentication failed" in response.message
+
+
+def test_auth_wrong_key(server_with_key: ServerHandle) -> None:
+    """Sending the wrong API key should fail."""
+    stream = server_with_key.connect()
+    proto.send_frame(stream, proto.AuthRequest(api_key="wrong"))
+    response = proto.recv_frame(stream)
+    stream.close()
+    assert isinstance(response, proto.ErrorResponse)
+    assert "Authentication failed" in response.message
+
+
+def test_auth_correct_key(server_with_key: ServerHandle) -> None:
+    """Correct API key followed by a ping should work."""
+    stream = server_with_key.connect()
+    proto.send_frame(stream, proto.AuthRequest(api_key="secret"))
+    auth_resp = proto.recv_frame(stream)
+    assert isinstance(auth_resp, proto.AuthOkResponse)
+
+    proto.send_frame(stream, proto.PingRequest())
+    pong = proto.recv_frame(stream)
+    stream.close()
+    assert isinstance(pong, proto.PongResponse)
+
+
+def test_server_backend_auth_end_to_end(server_with_key: ServerHandle) -> None:
+    """ServerBackend with the correct api_key should connect and submit successfully."""
+    from pbspy._server_backend import ServerBackend
+
+    backend = ServerBackend(server_with_key.host, server_with_key.port, api_key="secret")
+    job_id, job_name = backend.submit("#!/bin/bash\necho hi", name="test_job")
+    backend.close()
+    assert job_id == "100.mock"
+    assert job_name == "test_job"
+
+
+def test_server_backend_auth_wrong_key(server_with_key: ServerHandle) -> None:
+    """ServerBackend with a wrong api_key should raise RuntimeError on connect."""
+    from pbspy._server_backend import ServerBackend
+
+    with pytest.raises(RuntimeError, match="auth failed"):
+        ServerBackend(server_with_key.host, server_with_key.port, api_key="wrong")
+
+
+# ---------------------------------------------------------------------------
+# Exec tests
+# ---------------------------------------------------------------------------
+
+
+def test_exec_disabled_by_default(server: ServerHandle) -> None:
+    """ExecRequest on a server without --allow-exec should return ErrorResponse."""
+    response = server.rpc(proto.ExecRequest(command=["echo", "hi"]))
+    assert isinstance(response, proto.ErrorResponse)
+    assert "disabled" in response.message
+
+
+def test_exec_runs_command(server_with_exec: ServerHandle) -> None:
+    """ExecRequest with allow_exec=True should return ExecResponse."""
+    response = server_with_exec.rpc(proto.ExecRequest(command=["echo", "hi"]))
+    assert isinstance(response, proto.ExecResponse)
+    assert response.returncode == 0
+    assert response.stdout == b"hi\n"

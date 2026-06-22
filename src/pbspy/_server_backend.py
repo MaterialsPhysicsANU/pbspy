@@ -32,6 +32,7 @@ class ServerBackend(Backend):
         host: Hostname or IP address of the machine running pbspy-server.
         port: TCP port the server is listening on (default: 9876).
         connect_timeout: Seconds to wait for the initial TCP connection.
+        api_key: API key for authentication (required if the server requires it).
     """
 
     def __init__(
@@ -39,10 +40,12 @@ class ServerBackend(Backend):
         host: str,
         port: int = 9876,
         connect_timeout: float = 10.0,
+        api_key: str | None = None,
     ) -> None:
         self._host = host
         self._port = port
         self._connect_timeout = connect_timeout
+        self._api_key = api_key
         self._sock: socket.socket | None = None
         self._stream: BinaryIO | None = None
         self._lock = threading.Lock()
@@ -75,8 +78,31 @@ class ServerBackend(Backend):
             raise RuntimeError(f"Unexpected response: {response!r}")
         return response.result
 
+    def exec(self, command: list[str], stdin: bytes | None = None) -> tuple[int, bytes, bytes]:
+        """
+        Execute an arbitrary command on the server via SSH.
+
+        Requires the server to be started with ``--allow-exec``.
+
+        Args:
+            command: Command and arguments to execute.
+            stdin: Optional data to pass as standard input.
+
+        Returns:
+            A tuple of ``(returncode, stdout, stderr)``.
+
+        Raises:
+            RuntimeError: If the server rejects the request.
+        """
+        response = self._rpc(proto.ExecRequest(command=command, stdin=stdin))
+        if isinstance(response, proto.ErrorResponse):
+            raise RuntimeError(f"Server error: {response.message}")
+        if not isinstance(response, proto.ExecResponse):
+            raise RuntimeError(f"Unexpected response: {response!r}")
+        return response.returncode, response.stdout, response.stderr
+
     def _connect(self) -> None:
-        """Open a TCP connection to the server and verify liveness with a ping."""
+        """Open a TCP connection to the server, authenticate if required, and verify liveness."""
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(self._connect_timeout)
         try:
@@ -89,6 +115,20 @@ class ServerBackend(Backend):
         self._stream = cast(BinaryIO, sock.makefile("rwb", buffering=0))
 
         try:
+            # Auth step first — server expects AuthRequest before any other frame when
+            # an API key is configured.
+            if self._api_key is not None:
+                proto.send_frame(self._stream, proto.AuthRequest(api_key=self._api_key))
+                auth_resp = proto.recv_frame(self._stream)
+                if isinstance(auth_resp, proto.ErrorResponse):
+                    self._stream.close()
+                    sock.close()
+                    raise RuntimeError(f"pbspy-server auth failed: {auth_resp.message}")
+                if not isinstance(auth_resp, proto.AuthOkResponse):
+                    self._stream.close()
+                    sock.close()
+                    raise RuntimeError(f"pbspy-server returned unexpected auth response: {auth_resp!r}")
+
             proto.send_frame(self._stream, proto.PingRequest())
             pong = proto.recv_frame(self._stream)
         except (OSError, EOFError) as exc:
