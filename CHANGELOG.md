@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/MaterialsPhysicsANU/pbspy/compare/v0.0.9...HEAD)
 
+### Removed
+
+- Remove `progress` parameter from `Job` `wait` methods
+- Remove `rich` dependency
+
 ## [0.0.9](https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.9) - 2026-05-18
 
 ### Added
