@@ -1,5 +1,4 @@
 import typer
-from rich import print
 
 from pbspy import Job, JobDescription, QueueLimits
 

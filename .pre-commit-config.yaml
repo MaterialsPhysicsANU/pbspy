@@ -48,7 +48,6 @@ repos:
         always_run: true
         args: [src, tests, examples]
         additional_dependencies:
-          - rich
           - typer
   - repo: https://github.com/scientific-python/cookie
     rev: 2024.04.23

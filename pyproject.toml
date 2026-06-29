@@ -19,8 +19,8 @@ classifiers = [
 ]
 license = {text = "MIT License"}
 dependencies = [
-  "rich~=13.8",
 ]
+
 
 [dependency-groups]
 dev = [
