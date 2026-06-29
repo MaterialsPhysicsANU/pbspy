@@ -83,51 +83,39 @@ class Job:
         self.__dict__.update(state)
         self.backend = _DEFAULT_LOCAL_BACKEND
 
-    def wait(self, progress: bool = True) -> None:
+    def wait(self, **kwargs: dict[str, Any]) -> None:
         """
         Wait for the job to complete.
-
-        Args:
-            progress (bool): Whether or not to print the state of the job and status on exit.
         """
-        self.backend.wait([self], progress=progress)
+        self.backend.wait([self])
 
-    def result(self, progress: bool = True) -> JobResult:
+    def result(self, **kwargs: dict[str, Any]) -> JobResult:
         """
         Waits for the job to complete and returns the result.
-
-        Args:
-            progress (bool): Whether or not to print the state of the job and status on exit.
         """
-        self.wait(progress=progress)
+        self.wait()
         return self.backend.get_result(self)  # type: ignore[return-value]
 
     @staticmethod
-    def wait_all(jobs: list[Job], progress: bool = True) -> None:
+    def wait_all(jobs: list[Job], **kwargs: dict[str, Any]) -> None:
         """
         Waits for multiple jobs to complete.
-
-        Args:
-            progress (bool): Whether or not to print the state of the job and status on exit.
         """
         if not jobs:
             return
         # Group by backend so each backend can wait for its own jobs efficiently
-        _wait_all_grouped(jobs, progress=progress)
+        _wait_all_grouped(jobs)
 
     @staticmethod
-    def result_all(jobs: list[Job], progress: bool = True) -> list[JobResult]:
+    def result_all(jobs: list[Job], **kwargs: dict[str, Any]) -> list[JobResult]:
         """
         Waits for multiple jobs to complete and returns their results.
-
-        Args:
-            progress (bool): Whether or not to print the state of the job and status on exit.
         """
-        Job.wait_all(jobs, progress=progress)
+        Job.wait_all(jobs)
         return [job.backend.get_result(job) for job in jobs]  # type: ignore[misc]
 
 
-def _wait_all_grouped(jobs: list[Job], progress: bool) -> None:
+def _wait_all_grouped(jobs: list[Job]) -> None:
     """Group jobs by backend identity and wait per group."""
     groups: dict[int, tuple[Backend, list[Job]]] = {}
     for job in jobs:
@@ -136,7 +124,7 @@ def _wait_all_grouped(jobs: list[Job], progress: bool) -> None:
             groups[bid] = (job.backend, [])
         groups[bid][1].append(job)
     for backend, group in groups.values():
-        backend.wait(group, progress=progress)
+        backend.wait(group)
 
 
 @dataclass(kw_only=True)

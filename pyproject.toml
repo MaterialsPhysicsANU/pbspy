@@ -19,7 +19,6 @@ classifiers = [
 ]
 license = {text = "MIT License"}
 dependencies = [
-  "rich~=13.8",
 ]
 
 [project.scripts]

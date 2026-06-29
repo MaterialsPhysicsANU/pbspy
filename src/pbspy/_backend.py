@@ -41,7 +41,6 @@ class Backend(ABC):
         self,
         jobs: list[Job],
         on_update: Callable[[str, str | None], None] | None = None,
-        progress: bool = True,
     ) -> None:
         """
         Wait for *jobs* to finish.
@@ -50,7 +49,6 @@ class Backend(ABC):
             jobs: List of :class:`~pbspy.Job` objects.
             on_update: Optional callback ``(job_id, state)`` on each status
                 change.  *state* is ``None`` when the job has finished.
-            progress: Whether to show a progress display.
         """
         ...
 

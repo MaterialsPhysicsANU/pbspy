@@ -57,12 +57,8 @@ class StreamBackend(Backend):
         self,
         jobs: list[Job],
         on_update: Callable[[str, str | None], None] | None = None,
-        progress: bool = True,
     ) -> None:
-        if progress:
-            self._wait_with_progress(jobs, on_update)
-        else:
-            self._wait_quiet(jobs, on_update)
+        self._wait_quiet(jobs, on_update)
 
     def get_result(self, job: object) -> object:
         response = self._rpc(proto.ResultRequest(job=job))  # type: ignore[arg-type]
@@ -175,50 +171,6 @@ class StreamBackend(Backend):
                 return
             elif isinstance(response, proto.ErrorResponse):
                 raise RuntimeError(f"Server error while waiting: {response.message}")
-
-    def _wait_with_progress(
-        self,
-        jobs: list[Job],
-        on_update: Callable[[str, str | None], None] | None,
-    ) -> None:
-        from rich.progress import Progress, TextColumn, TimeElapsedColumn
-
-        self._send(proto.WaitRequest(jobs=jobs))
-
-        with Progress(
-            TimeElapsedColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            auto_refresh=False,
-        ) as progress_bar:
-            tasks = {
-                job.job_id: progress_bar.add_task(
-                    f"{job.job_id} {job.job_name or ''} {job.description or ''}",
-                    total=1,
-                )
-                for job in jobs
-            }
-
-            while True:
-                response = self._recv()
-                progress_bar.refresh()
-
-                if isinstance(response, proto.StatusUpdateResponse):
-                    job = response.job
-                    if response.state is None:
-                        task = tasks.get(job.job_id)
-                        if task is not None:
-                            progress_bar.advance(task)
-                            progress_bar.update(task, visible=False)
-                        if on_update:
-                            on_update(job.job_id, None)
-                    elif on_update:
-                        on_update(job.job_id, response.state)
-
-                elif isinstance(response, proto.WaitDoneResponse):
-                    return
-
-                elif isinstance(response, proto.ErrorResponse):
-                    raise RuntimeError(f"Server error while waiting: {response.message}")
 
     def close(self) -> None:
         if self._stream is not None:
