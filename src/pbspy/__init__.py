@@ -127,7 +127,7 @@ class Job:
     description: str | None = None
     """A description of the job for progress updates. Unused by PBS."""
 
-    def wait(self, **kwargs) -> None:
+    def wait(self, **kwargs: dict[str, Any]) -> None:
         """
         Wait for the job to complete.
 
@@ -196,7 +196,7 @@ class Job:
         return self._result_no_wait()
 
     @staticmethod
-    def wait_all(jobs: list[Job], **kwargs) -> None:
+    def wait_all(jobs: list[Job], **kwargs: dict[str, Any]) -> None:
         """
         Waits for multiple jobs to complete.
 
@@ -206,7 +206,7 @@ class Job:
         _pbs_wait_for_jobs(jobs)
 
     @staticmethod
-    def result_all(jobs: list[Job], **kwargs) -> list[JobResult]:
+    def result_all(jobs: list[Job], **kwargs: dict[str, Any]) -> list[JobResult]:
         """
         Waits for multiple jobs to complete and returns their results.
 
