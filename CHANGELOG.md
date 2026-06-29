@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- Remove `progress` parameter from `Job` `wait` methods and stop printing job IDs and progress
-  - Downstream libraries must implement their own progress reporting
+- Remove `progress` parameter from the `wait[_all]` and `result[_all]` methods of `Job`
+  - These methods no longer print job IDs or progress
 - Remove `rich` dependency
 
 ## [0.0.9](https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.9) - 2026-05-18

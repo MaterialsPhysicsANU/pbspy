@@ -130,9 +130,6 @@ class Job:
     def wait(self, **kwargs: dict[str, Any]) -> None:
         """
         Wait for the job to complete.
-
-        Args:
-            progress (bool): Whether or not to print the state of the job and status on exit.
         """
         _pbs_wait_for_jobs([self])
 
@@ -185,23 +182,17 @@ class Job:
 
         return JobResult(exit_code=exit_code, output=output, error=error, stats=pbs_stats)
 
-    def result(self, progress: bool = True) -> JobResult:
+    def result(self, **kwargs: dict[str, Any]) -> JobResult:
         """
         Waits for the job to complete and returns the result.
-
-        Args:
-            progress (bool): Whether or not to print the state of the job and status on exit.
         """
-        self.wait(progress=progress)
+        self.wait()
         return self._result_no_wait()
 
     @staticmethod
     def wait_all(jobs: list[Job], **kwargs: dict[str, Any]) -> None:
         """
         Waits for multiple jobs to complete.
-
-        Args:
-            progress (bool): Whether or not to print the state of the job and status on exit.
         """
         _pbs_wait_for_jobs(jobs)
 
@@ -209,9 +200,6 @@ class Job:
     def result_all(jobs: list[Job], **kwargs: dict[str, Any]) -> list[JobResult]:
         """
         Waits for multiple jobs to complete and returns their results.
-
-        Args:
-            progress (bool): Whether or not to print the state of the job and status on exit.
         """
         _pbs_wait_for_jobs(jobs)
         return [job._result_no_wait() for job in jobs]
