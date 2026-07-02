@@ -64,6 +64,13 @@ def test_roundtrip_result_request() -> None:
     assert result.job.job_id == "42.gadi"
 
 
+def test_roundtrip_delete_request() -> None:
+    req = proto.DeleteRequest(job_ids=["1.gadi", "2.gadi"])
+    result = roundtrip(req)
+    assert isinstance(result, proto.DeleteRequest)
+    assert result.job_ids == ["1.gadi", "2.gadi"]
+
+
 # ---------------------------------------------------------------------------
 # Response types
 # ---------------------------------------------------------------------------
@@ -121,6 +128,11 @@ def test_roundtrip_error_response() -> None:
     result = roundtrip(resp)
     assert isinstance(result, proto.ErrorResponse)
     assert result.message == "something went wrong"
+
+
+def test_roundtrip_delete_response() -> None:
+    result = roundtrip(proto.DeleteResponse())
+    assert isinstance(result, proto.DeleteResponse)
 
 
 # ---------------------------------------------------------------------------

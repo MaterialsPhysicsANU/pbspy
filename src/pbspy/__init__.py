@@ -83,21 +83,25 @@ class Job:
         self.__dict__.update(state)
         self.backend = _DEFAULT_LOCAL_BACKEND
 
-    def wait(self, **kwargs: dict[str, Any]) -> None:
+    def wait(self, **kwargs: Any) -> None:
         """
         Wait for the job to complete.
         """
         self.backend.wait([self])
 
-    def result(self, **kwargs: dict[str, Any]) -> JobResult:
+    def result(self, **kwargs: Any) -> JobResult:
         """
         Waits for the job to complete and returns the result.
         """
         self.wait()
         return self.backend.get_result(self)  # type: ignore[return-value]
 
+    def cancel(self) -> None:
+        """Cancel (``qdel``) this job."""
+        self.backend.delete([self.job_id])
+
     @staticmethod
-    def wait_all(jobs: list[Job], **kwargs: dict[str, Any]) -> None:
+    def wait_all(jobs: list[Job], **kwargs: Any) -> None:
         """
         Waits for multiple jobs to complete.
         """
@@ -107,7 +111,7 @@ class Job:
         _wait_all_grouped(jobs)
 
     @staticmethod
-    def result_all(jobs: list[Job], **kwargs: dict[str, Any]) -> list[JobResult]:
+    def result_all(jobs: list[Job], **kwargs: Any) -> list[JobResult]:
         """
         Waits for multiple jobs to complete and returns their results.
         """

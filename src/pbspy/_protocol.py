@@ -26,7 +26,7 @@ __all__ = [
     "WaitRequest",
     "ResultRequest",
     "PingRequest",
-    "ExecRequest",
+    "DeleteRequest",
     # Responses
     "AuthOkResponse",
     "SubmittedResponse",
@@ -35,7 +35,7 @@ __all__ = [
     "ResultResponse",
     "PongResponse",
     "ErrorResponse",
-    "ExecResponse",
+    "DeleteResponse",
     # Framing
     "send_frame",
     "recv_frame",
@@ -84,6 +84,13 @@ class AuthRequest:
 @dataclass
 class PingRequest:
     """Liveness check; server responds with :class:`PongResponse`."""
+
+
+@dataclass
+class DeleteRequest:
+    """Ask the server to cancel (``qdel``) one or more jobs."""
+
+    job_ids: list[str]
 
 
 # ---------------------------------------------------------------------------
@@ -137,14 +144,6 @@ class AuthOkResponse:
 
 
 @dataclass
-class ExecRequest:
-    """Ask the server to execute an arbitrary command via SSH."""
-
-    command: list[str]
-    stdin: bytes | None = None
-
-
-@dataclass
 class ErrorResponse:
     """Returned when the server encounters an error handling a request."""
 
@@ -152,12 +151,8 @@ class ErrorResponse:
 
 
 @dataclass
-class ExecResponse:
-    """Returned after a successful :class:`ExecRequest`."""
-
-    returncode: int
-    stdout: bytes
-    stderr: bytes
+class DeleteResponse:
+    """Returned after a successful :class:`DeleteRequest`."""
 
 
 # ---------------------------------------------------------------------------

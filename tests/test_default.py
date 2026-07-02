@@ -37,6 +37,7 @@ class _MockBackend(Backend):
         self.submitted: list[tuple[str, str | None]] = []
         self.waited: list[list[Job]] = []
         self.results: dict[str, JobResult] = {}
+        self.deleted: list[list[str]] = []
 
     def submit(self, script: str, name: str | None = None) -> tuple[str, str]:
         self.submitted.append((script, name))
@@ -53,6 +54,9 @@ class _MockBackend(Backend):
     def get_result(self, job: object) -> object:
         assert isinstance(job, Job)
         return self.results.get(job.job_id, JobResult(exit_code=None))
+
+    def delete(self, job_ids: list[str]) -> None:
+        self.deleted.append(list(job_ids))
 
 
 def test_mock_backend_submit() -> None:
@@ -283,3 +287,112 @@ def test_job_pickle_preserves_output_and_error_paths() -> None:
     assert restored.error_path == "/scratch/project/job.err"
     assert restored.job_id == "789.mock"
     assert restored.job_name == "my_job"
+
+
+# ---------------------------------------------------------------------------
+# pbs_get_states / pbs_delete / Job.cancel
+# ---------------------------------------------------------------------------
+
+
+def test_pbs_get_states_single_qstat_call() -> None:
+    """pbs_get_states issues exactly one qstat call for multiple job ids."""
+    from pbspy._pbs_core import PBSRunner, pbs_get_states
+
+    class _RecordingRunner(PBSRunner):
+        def __init__(self) -> None:
+            self.calls: list[list[str]] = []
+
+        def run(self, cmd: list[str], *, input: bytes | None = None) -> subprocess.CompletedProcess[bytes]:
+            self.calls.append(cmd)
+            stdout = (
+                b"Job id            Name             User              Time Use S Queue\n"
+                b"----------------  ---------------- ----------------  -------- - -----\n"
+                b"123.gadi-pbs      job_a            user00            00:00:12 R normal\n"
+                b"124.gadi-pbs      job_b            user00            00:00:00 Q normal\n"
+            )
+            return subprocess.CompletedProcess(cmd, 0, stdout=stdout, stderr=b"")
+
+    runner = _RecordingRunner()
+    states = pbs_get_states(["123.gadi-pbs", "124.gadi-pbs", "125.gadi-pbs"], runner=runner)
+
+    assert len(runner.calls) == 1
+    assert runner.calls[0] == ["qstat", "123.gadi-pbs", "124.gadi-pbs", "125.gadi-pbs"]
+    assert states == {
+        "123.gadi-pbs": "R",
+        "124.gadi-pbs": "Q",
+        "125.gadi-pbs": None,  # not listed => finished
+    }
+
+
+def test_pbs_get_states_empty_list() -> None:
+    """pbs_get_states with no job ids makes no qstat call and returns an empty dict."""
+    from pbspy._pbs_core import PBSRunner, pbs_get_states
+
+    class _FailIfCalledRunner(PBSRunner):
+        def run(self, cmd: list[str], *, input: bytes | None = None) -> subprocess.CompletedProcess[bytes]:
+            raise AssertionError("qstat should not be called for an empty job list")
+
+    assert pbs_get_states([], runner=_FailIfCalledRunner()) == {}
+
+
+def test_pbs_delete_single_qdel_call() -> None:
+    """pbs_delete issues exactly one qdel call for multiple job ids."""
+    from pbspy._pbs_core import PBSRunner, pbs_delete
+
+    class _RecordingRunner(PBSRunner):
+        def __init__(self) -> None:
+            self.calls: list[list[str]] = []
+
+        def run(self, cmd: list[str], *, input: bytes | None = None) -> subprocess.CompletedProcess[bytes]:
+            self.calls.append(cmd)
+            return subprocess.CompletedProcess(cmd, 0, stdout=b"", stderr=b"")
+
+    runner = _RecordingRunner()
+    pbs_delete(["123.gadi-pbs", "124.gadi-pbs"], runner=runner)
+
+    assert len(runner.calls) == 1
+    assert runner.calls[0] == ["qdel", "123.gadi-pbs", "124.gadi-pbs"]
+
+
+def test_pbs_delete_idempotent_for_finished_jobs() -> None:
+    """pbs_delete does not raise when qdel reports the job has already finished."""
+    from pbspy._pbs_core import PBSRunner, pbs_delete
+
+    class _FinishedRunner(PBSRunner):
+        def run(self, cmd: list[str], *, input: bytes | None = None) -> subprocess.CompletedProcess[bytes]:
+            return subprocess.CompletedProcess(cmd, 1, stdout=b"", stderr=b"qdel: Job has finished 123.gadi-pbs")
+
+    pbs_delete(["123.gadi-pbs"], runner=_FinishedRunner())  # should not raise
+
+
+def test_pbs_delete_idempotent_for_unknown_jobs() -> None:
+    """pbs_delete does not raise when qdel reports an unknown job id."""
+    from pbspy._pbs_core import PBSRunner, pbs_delete
+
+    class _UnknownRunner(PBSRunner):
+        def run(self, cmd: list[str], *, input: bytes | None = None) -> subprocess.CompletedProcess[bytes]:
+            return subprocess.CompletedProcess(cmd, 1, stdout=b"", stderr=b"qdel: Unknown Job Id 123.gadi-pbs")
+
+    pbs_delete(["123.gadi-pbs"], runner=_UnknownRunner())  # should not raise
+
+
+def test_pbs_delete_raises_on_other_errors() -> None:
+    """pbs_delete raises for genuine errors (not the finished/unknown cases)."""
+    from pbspy._pbs_core import PBSRunner, pbs_delete
+
+    class _BrokenRunner(PBSRunner):
+        def run(self, cmd: list[str], *, input: bytes | None = None) -> subprocess.CompletedProcess[bytes]:
+            return subprocess.CompletedProcess(cmd, 1, stdout=b"", stderr=b"qdel: permission denied")
+
+    with pytest.raises(RuntimeError, match="permission denied"):
+        pbs_delete(["123.gadi-pbs"], runner=_BrokenRunner())
+
+
+def test_job_cancel_calls_backend_delete() -> None:
+    """Job.cancel() delegates to backend.delete([job_id])."""
+    mock = _MockBackend()
+    job = Job(job_id="123.mock", job_name="job_a", backend=mock)
+
+    job.cancel()
+
+    assert mock.deleted == [["123.mock"]]

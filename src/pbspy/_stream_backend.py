@@ -68,28 +68,21 @@ class StreamBackend(Backend):
             raise RuntimeError(f"Unexpected response: {response!r}")
         return response.result
 
-    def exec(self, command: list[str], stdin: bytes | None = None) -> tuple[int, bytes, bytes]:
+    def delete(self, job_ids: list[str]) -> None:
         """
-        Execute an arbitrary command on the server via SSH.
-
-        Requires the server to be started with ``--allow-exec``.
+        Cancel (``qdel``) the given jobs on the server.
 
         Args:
-            command: Command and arguments to execute.
-            stdin: Optional data to pass as standard input.
-
-        Returns:
-            A tuple of ``(returncode, stdout, stderr)``.
+            job_ids: Job ids to cancel.
 
         Raises:
             RuntimeError: If the server rejects the request.
         """
-        response = self._rpc(proto.ExecRequest(command=command, stdin=stdin))
+        response = self._rpc(proto.DeleteRequest(job_ids=job_ids))
         if isinstance(response, proto.ErrorResponse):
             raise RuntimeError(f"Server error: {response.message}")
-        if not isinstance(response, proto.ExecResponse):
+        if not isinstance(response, proto.DeleteResponse):
             raise RuntimeError(f"Unexpected response: {response!r}")
-        return response.returncode, response.stdout, response.stderr
 
     def _connect(self) -> None:
         """Open the transport, authenticate if required, and verify liveness with a ping."""

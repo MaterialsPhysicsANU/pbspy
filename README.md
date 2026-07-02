@@ -42,14 +42,25 @@ print("job_b:", result_b.output.strip())
 
 ### Submitting from a remote machine via a `pbspy-server` daemon
 
-Run `pbspy-server` somewhere with SSH access to the supercomputer (see [docker-compose.yml](./docker-compose.yml)
-for a containerised example), then connect to it with `ServerBackend`:
+`pbspy-server` runs every PBS command (`qsub`, `qstat`, `qdel`, file reads) locally,
+so it must run somewhere with direct PBS access. On NCI Gadi that means a
+[persistent session](https://opus.nci.org.au/display/Help/Persistent+Sessions):
+
+```bash
+persistent-sessions start pbspy
+ssh pbspy.<user>.<project>.ps.gadi.nci.org.au
+uv tool install pbspy
+pbspy-server --host 0.0.0.0 --api-key ...
+```
+
+Then connect to it with `ServerBackend` (from inside the supercomputer's network, or via an SSH
+tunnel/port-forward if you need to reach it from elsewhere):
 
 ```python
 from pbspy import Job, JobDescription, ServerBackend
 
 backend = ServerBackend(
-    "pbspy-server.example.com", api_key="..."
+    "pbspy.<user>.<project>.ps.gadi.nci.org.au", api_key="..."
 )  # api_key only if the server requires it
 
 job_a = (
@@ -68,37 +79,6 @@ job_b = (
 print("job_a:", result_a.output.strip())
 print("job_b:", result_b.output.strip())
 ```
-
-By default `pbspy-server` runs every PBS command (`qsub`, `qstat`, file reads) over a fresh SSH
-connection to the supercomputer (`--ssh-host gadi.nci.org.au`). `ServerBackend` doesn't know or
-care which of the deployments below is on the other end — the wire protocol is identical either way.
-
-### Running the server on the supercomputer itself (persistent sessions)
-
-If your supercomputer supports long-running background processes (e.g. NCI Gadi's
-[persistent sessions](https://opus.nci.org.au/display/Help/Persistent+Sessions)), you can instead
-run `pbspy-server` directly there — PBS commands then run in-process with no per-command SSH
-round trip:
-
-```bash
-persistent-sessions start pbspy
-ssh pbspy.<user>.<project>.ps.gadi.nci.org.au
-uv tool install pbspy
-pbspy-server --host 127.0.0.1   # no --ssh-host: PBS commands run locally
-```
-
-Persistent-session hostnames are only resolvable from inside the supercomputer's network, so a
-client outside it can't connect directly. Run a `ProxyServer` wherever your existing
-`ServerBackend`-based code already points (e.g. in place of the direct-SSH daemon above) — it
-relays each connection to the real server via `ssh -W`, so existing client code needs no changes at
-all:
-
-```bash
-pbspy-server --proxy-to pbspy.<user>.<project>.ps.gadi.nci.org.au --remote-port 9876
-```
-
-(Add `ProxyJump`/`-J` to your SSH config for that host alias first, since the persistent-session
-hostname needs to be reached via a login node.)
 
 ## Output (partially executed)
 

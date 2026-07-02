@@ -4,8 +4,9 @@ pbspy-server daemon.
 Listens on a configured TCP port, accepts connections from :class:`~pbspy.ServerBackend`
 clients, and dispatches pickled requests from :mod:`pbspy._protocol`.
 
-PBS operations (qsub, qstat, file reads) are executed via SSH to a remote
-supercomputer when ``ssh_host`` is provided, or locally when omitted.
+PBS operations (qsub, qstat, qdel, file reads) are executed locally, so this server is
+intended to run natively on the machine with PBS access (e.g. a Gadi persistent session
+with ``/g/data`` mounted) rather than behind SSH.
 
 A background thread polls ``qstat`` every 60 seconds for all unfinished jobs
 and pushes :class:`StatusUpdateResponse` frames to any clients waiting on
@@ -56,10 +57,9 @@ class _WaitSubscription:
 class _ServerState:
     """Shared mutable state accessed by both connection threads and the poll thread."""
 
-    def __init__(self, runner: core.PBSRunner, api_key: str | None = None, allow_exec: bool = False) -> None:
+    def __init__(self, runner: core.PBSRunner, api_key: str | None = None) -> None:
         self.runner = runner
         self.api_key = api_key
-        self.allow_exec = allow_exec
         self.lock = threading.Lock()
         self.jobs: dict[str, _JobRecord] = {}
         self.subscriptions: dict[str, list[_WaitSubscription]] = {}
@@ -106,24 +106,17 @@ def _poll_loop(
         try:
             with state.lock:
                 unfinished = [r for r in state.jobs.values() if not r.finished]
+            if not unfinished:
+                continue
+            states = core.pbs_get_states([r.job_id for r in unfinished], runner=state.runner)
             for record in unfinished:
-                job = Job(job_id=record.job_id, job_name=record.job_name)
-                if _check_job_finished(record.job_id, state.runner) is not None:
+                if states.get(record.job_id) is None:
+                    job = Job(job_id=record.job_id, job_name=record.job_name)
                     with state.lock:
                         record.finished = True
                     state.notify_finished(record.job_id, job)
         except Exception:
             logger.exception("Error in poll loop")
-
-
-def _check_job_finished(job_id: str, runner: core.PBSRunner) -> int | None:
-    """Return exit code if job has finished, else None."""
-    process = runner.run(["qstat", job_id])
-    if process.returncode != 0:
-        stdout = process.stdout.decode("utf-8")
-        if job_id not in stdout or "has finished" in process.stderr.decode("utf-8"):
-            return core.try_get_exit_code(job_id, runner) or 0
-    return None
 
 
 def _handle_connection(conn: socket.socket, state: _ServerState) -> None:
@@ -186,21 +179,9 @@ def _handle_connection(conn: socket.socket, state: _ServerState) -> None:
                 elif isinstance(request, proto.AuthRequest):
                     proto.send_frame(stream, proto.AuthOkResponse())
 
-                elif isinstance(request, proto.ExecRequest):
-                    if not state.allow_exec:
-                        proto.send_frame(
-                            stream, proto.ErrorResponse(message="SSH command execution is disabled on this server")
-                        )
-                    else:
-                        exec_result = state.runner.run(request.command, input=request.stdin)
-                        proto.send_frame(
-                            stream,
-                            proto.ExecResponse(
-                                returncode=exec_result.returncode,
-                                stdout=exec_result.stdout,
-                                stderr=exec_result.stderr,
-                            ),
-                        )
+                elif isinstance(request, proto.DeleteRequest):
+                    core.pbs_delete(request.job_ids, runner=state.runner)
+                    proto.send_frame(stream, proto.DeleteResponse())
 
                 else:
                     proto.send_frame(stream, proto.ErrorResponse(message=f"Unknown request type: {type(request)}"))
@@ -219,12 +200,8 @@ def _handle_connection(conn: socket.socket, state: _ServerState) -> None:
 def run_server(
     host: str = "0.0.0.0",
     port: int = 9876,
-    ssh_host: str | None = None,
-    ssh_user: str | None = None,
-    ssh_args: list[str] | None = None,
     poll_interval: float = _POLL_INTERVAL,
     api_key: str | None = None,
-    allow_exec: bool = False,
     _stop_event: threading.Event | None = None,
     _ready_callback: Callable[[int], None] | None = None,
 ) -> None:
@@ -234,29 +211,18 @@ def run_server(
     Runs in the foreground; use your OS's service manager (systemd, nohup,
     etc.) to run it as a background service.
 
-    When *ssh_host* is provided, all PBS operations (qsub, qstat, file reads)
-    are executed on that host via SSH.  Otherwise they run locally.
+    All PBS operations (qsub, qstat, qdel, file reads) run locally, so this should be started
+    on a machine with PBS access (e.g. a Gadi persistent session with ``/g/data`` mounted).
 
     Args:
         host: Local address to bind (default ``"0.0.0.0"``).
         port: TCP port to listen on (default 9876; pass 0 for OS-assigned).
-        ssh_host: Supercomputer hostname to SSH into for PBS commands.
-        ssh_user: SSH username (combined with *ssh_host* as ``user@host``).
-        ssh_args: Extra arguments forwarded to the ``ssh`` command.
         poll_interval: Seconds between qstat polls (default 60).
         api_key: When set, clients must send a matching :class:`~pbspy._protocol.AuthRequest`
             as the first frame or the connection is rejected.
-        allow_exec: When ``True``, clients may send :class:`~pbspy._protocol.ExecRequest`
-            to run arbitrary commands via the server's SSH runner.  Disabled by default.
     """
-    destination: str | None = None
-    ssh_prefix: list[str] | None = None
-    if ssh_host is not None:
-        destination = f"{ssh_user}@{ssh_host}" if ssh_user else ssh_host
-        ssh_prefix = ["ssh", *(ssh_args or []), destination]
-
-    runner = core.PBSRunner(ssh_prefix)
-    state = _ServerState(runner=runner, api_key=api_key, allow_exec=allow_exec)
+    runner = core.PBSRunner()
+    state = _ServerState(runner=runner, api_key=api_key)
 
     stop_event = _stop_event or threading.Event()
 
@@ -282,11 +248,6 @@ def run_server(
 
     actual_port = srv.getsockname()[1]
     logger.info("pbspy-server listening on %s:%d", host, actual_port)
-    if ssh_host:
-        logger.info("PBS commands will run via SSH on %s", destination)
-
-    if allow_exec:
-        logger.warning("SSH command execution is enabled (--allow-exec)")
 
     if _ready_callback is not None:
         _ready_callback(actual_port)

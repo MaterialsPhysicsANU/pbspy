@@ -17,28 +17,28 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pbspy import Job, JobResult
 
-__all__ = ["PBSRunner", "pbs_submit", "pbs_wait_for_jobs", "pbs_get_result", "try_get_exit_code"]
+__all__ = [
+    "PBSRunner",
+    "pbs_submit",
+    "pbs_wait_for_jobs",
+    "pbs_get_result",
+    "pbs_get_states",
+    "pbs_delete",
+    "try_get_exit_code",
+]
 
 _POLL_INTERVAL_SECONDS = 60
 _PROGRESS_REFRESH_SECONDS = 1
 
 
 class PBSRunner:
-    """
-    Abstracts command execution and file reading for PBS operations.
-
-    The default instance runs commands locally.  Pass ``ssh_prefix`` to run
-    commands on a remote host via SSH (e.g. ``["ssh", "user@host"]``).
-    """
-
-    def __init__(self, ssh_prefix: list[str] | None = None) -> None:
-        self._prefix: list[str] = ssh_prefix or []
+    """Abstracts command execution and file reading for PBS operations. Runs commands locally."""
 
     def run(self, cmd: list[str], *, input: bytes | None = None) -> subprocess.CompletedProcess[bytes]:
-        return subprocess.run(self._prefix + cmd, input=input, capture_output=True)
+        return subprocess.run(cmd, input=input, capture_output=True)
 
     def read_file(self, path: str) -> str:
-        """Read a file (possibly on a remote host via ``ssh … cat``) and return its text."""
+        """Read a local file and return its text."""
         result = self.run(["cat", path])
         if result.returncode != 0:
             raise FileNotFoundError(path)
@@ -124,6 +124,52 @@ def pbs_wait_for_jobs(
                             on_update(job.job_id, None)
 
 
+def pbs_get_states(job_ids: list[str], runner: PBSRunner = _LOCAL_RUNNER) -> dict[str, str | None]:
+    """
+    Look up the PBS state of each id in *job_ids* with a single ``qstat`` call.
+
+    Returns:
+        A mapping of job id -> state (``"Q"``, ``"R"``, ``"E"``, etc.), or ``None`` when the
+        id is no longer listed by ``qstat`` (i.e. the job has finished).
+    """
+    if not job_ids:
+        return {}
+
+    states: dict[str, str | None] = dict.fromkeys(job_ids)
+    process = runner.run(["qstat", *job_ids])
+    output = process.stdout.decode("utf-8")
+
+    for line in output.splitlines():
+        line = line.strip()
+        if not line or line.startswith("Job id") or line.startswith("---"):
+            continue
+        fields = line.split()
+        if len(fields) < 5:
+            continue
+        job_id = fields[0]
+        if job_id in states:
+            states[job_id] = fields[4]
+
+    # Any id not found in the qstat table is left as None (finished / unknown), matching the
+    # "job_id not in output or has finished" convention used elsewhere in this module.
+    return states
+
+
+def pbs_delete(job_ids: list[str], runner: PBSRunner = _LOCAL_RUNNER) -> None:
+    """
+    Cancel jobs via a single ``qdel`` call. Idempotent: already-finished or unknown job ids
+    are treated as success rather than raising.
+    """
+    if not job_ids:
+        return
+
+    process = runner.run(["qdel", *job_ids])
+    if process.returncode != 0:
+        stderr = process.stderr.decode("utf-8")
+        if "has finished" not in stderr and "Unknown Job Id" not in stderr:
+            raise RuntimeError(f"Failed to delete job(s): {stderr.strip()}")
+
+
 def pbs_get_result(job: Job, runner: PBSRunner = _LOCAL_RUNNER) -> JobResult:
     """
     Read the output/error files for a completed job and return a :class:`~pbspy.JobResult`.
@@ -207,6 +253,6 @@ def format_job_script(
 {f"#PBS -o {output_path}" if output_path else ""}
 {f"#PBS -e {error_path}" if error_path else ""}
 {"#PBS -l wd" if wd else ""}
-{f'#PBS -W depend=afterok:{":".join(afterok_ids)}' if afterok_ids else ""}
+{f"#PBS -W depend=afterok:{":".join(afterok_ids)}" if afterok_ids else ""}
 {commands_str}
 """

@@ -43,3 +43,7 @@ class LocalBackend(Backend):
     def get_result(self, job: object) -> object:  # job: Job -> JobResult
         """Return the :class:`~pbspy.JobResult` for a completed job."""
         return core.pbs_get_result(job)  # type: ignore[arg-type]
+
+    def delete(self, job_ids: list[str]) -> None:
+        """Cancel (``qdel``) the given jobs."""
+        core.pbs_delete(job_ids)

@@ -2,7 +2,9 @@
 ServerBackend: communicates with a pbspy-server daemon over a plain TCP connection.
 
 Messages are exchanged as length-prefixed pickle frames (see :mod:`pbspy._protocol`).
-The server handles all SSH communication to the supercomputer internally.
+The server runs PBS commands (qsub, qstat, qdel) locally on the machine it's started on,
+so it's typically started on a machine with direct PBS access (e.g. a Gadi persistent
+session).
 """
 
 from __future__ import annotations
@@ -19,9 +21,9 @@ class ServerBackend(StreamBackend):
     """
     Backend that connects to a pbspy-server daemon over TCP.
 
-    The server (started with ``pbspy-server``) runs on any machine with SSH access to the
-    supercomputer; this client connects to it directly. It also works unmodified against a
-    ProxyServer (``pbspy-server --proxy-to ...``), since the wire protocol is identical.
+    The server (started with ``pbspy-server``) runs locally on a machine with direct PBS
+    access (e.g. a Gadi persistent session with ``/g/data`` mounted); this client connects
+    to it directly over TCP.
 
     Args:
         host: Hostname or IP address of the machine running pbspy-server.

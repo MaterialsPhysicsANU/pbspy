@@ -58,3 +58,13 @@ class Backend(ABC):
         Return the :class:`~pbspy.JobResult` for a completed job.
         """
         ...
+
+    @abstractmethod
+    def delete(self, job_ids: list[str]) -> None:
+        """
+        Cancel (``qdel``) the given jobs.
+
+        Args:
+            job_ids: Job ids to cancel.
+        """
+        ...

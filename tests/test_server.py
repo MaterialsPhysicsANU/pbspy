@@ -66,9 +66,15 @@ def mock_pbs_submit() -> Generator[MagicMock, None, None]:
 
 
 @pytest.fixture()
-def mock_check_finished() -> Generator[MagicMock, None, None]:
-    """Patch _check_job_finished to report jobs as never finished (default)."""
-    with patch("pbspy.server.server._check_job_finished", return_value=None) as m:
+def mock_get_states() -> Generator[MagicMock, None, None]:
+    """Patch core.pbs_get_states to report jobs as still running (never finished) by default."""
+    state = {"value": "R"}
+
+    def _get_states(job_ids: list[str], runner: object = None) -> dict[str, str | None]:
+        return dict.fromkeys(job_ids, state["value"])
+
+    with patch("pbspy.server.server.core.pbs_get_states", side_effect=_get_states) as m:
+        m.state = state
         yield m
 
 
@@ -84,7 +90,7 @@ def mock_pbs_get_result() -> Generator[MagicMock, None, None]:
 @pytest.fixture()
 def server(
     mock_pbs_submit: MagicMock,
-    mock_check_finished: MagicMock,
+    mock_get_states: MagicMock,
     mock_pbs_get_result: MagicMock,
 ) -> Generator[ServerHandle, None, None]:
     port_q: queue.SimpleQueue[int] = queue.SimpleQueue()
@@ -105,7 +111,7 @@ def server(
 @pytest.fixture()
 def server_with_key(
     mock_pbs_submit: MagicMock,
-    mock_check_finished: MagicMock,
+    mock_get_states: MagicMock,
     mock_pbs_get_result: MagicMock,
 ) -> Generator[ServerHandle, None, None]:
     port_q: queue.SimpleQueue[int] = queue.SimpleQueue()
@@ -117,33 +123,6 @@ def server_with_key(
             "port": 0,
             "poll_interval": 0.1,
             "api_key": "secret",
-            "_ready_callback": port_q.put,
-            "_stop_event": stop,
-        },
-        daemon=True,
-    )
-    t.start()
-    port = port_q.get(timeout=_WAIT_TIMEOUT)
-    yield ServerHandle("127.0.0.1", port)
-    stop.set()
-    t.join(timeout=2.0)
-
-
-@pytest.fixture()
-def server_with_exec(
-    mock_pbs_submit: MagicMock,
-    mock_check_finished: MagicMock,
-    mock_pbs_get_result: MagicMock,
-) -> Generator[ServerHandle, None, None]:
-    port_q: queue.SimpleQueue[int] = queue.SimpleQueue()
-    stop = threading.Event()
-
-    t = threading.Thread(
-        target=run_server,
-        kwargs={
-            "port": 0,
-            "poll_interval": 0.1,
-            "allow_exec": True,
             "_ready_callback": port_q.put,
             "_stop_event": stop,
         },
@@ -204,8 +183,8 @@ def test_wait_already_finished_returns_immediately() -> None:
     def _run() -> None:
         with (
             patch("pbspy.server.server.core.pbs_submit", return_value=("done.mock", "done_job")),
-            # Return 0 immediately so the very first poll marks the job finished.
-            patch("pbspy.server.server._check_job_finished", return_value=0),
+            # Return None immediately so the very first poll marks the job finished.
+            patch("pbspy.server.server.core.pbs_get_states", return_value={"done.mock": None}),
             patch("pbspy.server.server.core.pbs_get_result", return_value=JobResult(exit_code=0)),
         ):
             run_server(port=0, poll_interval=0.1, _ready_callback=port_q.put, _stop_event=stop)
@@ -239,7 +218,7 @@ def test_wait_already_finished_returns_immediately() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_wait_receives_status_update_then_done(server: ServerHandle, mock_check_finished: MagicMock) -> None:
+def test_wait_receives_status_update_then_done(server: ServerHandle, mock_get_states: MagicMock) -> None:
     """
     Submit a job, start waiting, then let the poll loop (0.1s interval) detect
     the job as finished and push WaitDoneResponse back to the client.
@@ -251,7 +230,7 @@ def test_wait_receives_status_update_then_done(server: ServerHandle, mock_check_
     proto.send_frame(stream, proto.WaitRequest(jobs=[job]))
 
     # Allow the poll loop to mark the job as finished.
-    mock_check_finished.return_value = 0
+    mock_get_states.state["value"] = None
 
     # Collect responses until WaitDoneResponse (or timeout).
     responses = []
@@ -328,20 +307,34 @@ def test_server_backend_auth_wrong_key(server_with_key: ServerHandle) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Exec tests
+# Delete
 # ---------------------------------------------------------------------------
 
 
-def test_exec_disabled_by_default(server: ServerHandle) -> None:
-    """ExecRequest on a server without --allow-exec should return ErrorResponse."""
-    response = server.rpc(proto.ExecRequest(command=["echo", "hi"]))
+def test_delete_returns_delete_response(server: ServerHandle) -> None:
+    """DeleteRequest should call core.pbs_delete once and return DeleteResponse."""
+    with patch("pbspy.server.server.core.pbs_delete") as mock_delete:
+        response = server.rpc(proto.DeleteRequest(job_ids=["100.mock", "101.mock"]))
+    assert isinstance(response, proto.DeleteResponse)
+    mock_delete.assert_called_once()
+    args, kwargs = mock_delete.call_args
+    assert args[0] == ["100.mock", "101.mock"]
+
+
+def test_delete_propagates_errors(server: ServerHandle) -> None:
+    """If core.pbs_delete raises, the server should send back an ErrorResponse."""
+    with patch("pbspy.server.server.core.pbs_delete", side_effect=RuntimeError("boom")):
+        response = server.rpc(proto.DeleteRequest(job_ids=["100.mock"]))
     assert isinstance(response, proto.ErrorResponse)
-    assert "disabled" in response.message
+    assert "boom" in response.message
 
 
-def test_exec_runs_command(server_with_exec: ServerHandle) -> None:
-    """ExecRequest with allow_exec=True should return ExecResponse."""
-    response = server_with_exec.rpc(proto.ExecRequest(command=["echo", "hi"]))
-    assert isinstance(response, proto.ExecResponse)
-    assert response.returncode == 0
-    assert response.stdout == b"hi\n"
+def test_server_backend_delete_end_to_end(server: ServerHandle) -> None:
+    """ServerBackend.delete() sends one DeleteRequest and returns without error."""
+    from pbspy._server_backend import ServerBackend
+
+    with patch("pbspy.server.server.core.pbs_delete") as mock_delete:
+        backend = ServerBackend(server.host, server.port)
+        backend.delete(["100.mock"])
+        backend.close()
+    mock_delete.assert_called_once()
