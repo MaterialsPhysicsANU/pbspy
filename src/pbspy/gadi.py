@@ -15,7 +15,7 @@ gadi_queue_limits: QueueLimitsMap = {
     "normalsl": QueueLimits(cpus_per_node=32, max_mem_per_node=192, max_jobfs_per_node=400),
     "hugemembw": QueueLimits(cpus_per_node=28, max_mem_per_node=1020, max_jobfs_per_node=390),
     "megamembw": QueueLimits(cpus_per_node=64, max_mem_per_node=3000, max_jobfs_per_node=800),
-    "copyq": QueueLimits(cpus_per_node=1, max_mem_per_node=190, max_jobfs_per_node=400),
+    "copyq": QueueLimits(cpus_per_node=1, max_mem_per_node=190, max_jobfs_per_node=200),
     "dgxa100": QueueLimits(cpus_per_node=16, max_mem_per_node=2000, max_jobfs_per_node=28000),
     "normalsr": QueueLimits(cpus_per_node=104, max_mem_per_node=500, max_jobfs_per_node=400),
     "expresssr": QueueLimits(cpus_per_node=104, max_mem_per_node=500, max_jobfs_per_node=400),
