@@ -32,6 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Legacy progress arguments remain accepted and are ignored while consumers migrate
 - Remove `rich` dependency
 
+### Fixed
+
+- Update `JOBFS` limit for jobs on the `copyq` queue of the `Gadi` supercomputer
+
 ## [0.0.9](https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.9) - 2026-05-18
 
 ### Added

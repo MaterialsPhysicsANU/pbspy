@@ -59,7 +59,7 @@ class Job:
     """The job identifier."""
 
     description: str | None = None
-    """A description of the job for progress updates. Unused by PBS."""
+    """A description of the job. Unused by PBS."""
 
     backend: Backend = field(default=_DEFAULT_LOCAL_BACKEND, repr=False, compare=False)
     """The backend used to submit and track this job."""
@@ -153,7 +153,7 @@ class JobDescription:
     """
 
     description: str | None = None
-    """A description of the job for progress updates. Unused by PBS."""
+    """A description of the job. Unused by PBS."""
 
     commands: list[str | list[str]] = field(default_factory=list)
     """A list of commands to be executed in the job."""
