@@ -125,9 +125,9 @@ class Job:
     """The job identifier."""
 
     description: str | None = None
-    """A description of the job for progress updates. Unused by PBS."""
+    """A description of the job. Unused by PBS."""
 
-    def wait(self, **kwargs: dict[str, Any]) -> None:
+    def wait(self) -> None:
         """
         Wait for the job to complete.
         """
@@ -182,7 +182,7 @@ class Job:
 
         return JobResult(exit_code=exit_code, output=output, error=error, stats=pbs_stats)
 
-    def result(self, **kwargs: dict[str, Any]) -> JobResult:
+    def result(self) -> JobResult:
         """
         Waits for the job to complete and returns the result.
         """
@@ -190,14 +190,14 @@ class Job:
         return self._result_no_wait()
 
     @staticmethod
-    def wait_all(jobs: list[Job], **kwargs: dict[str, Any]) -> None:
+    def wait_all(jobs: list[Job]) -> None:
         """
         Waits for multiple jobs to complete.
         """
         _pbs_wait_for_jobs(jobs)
 
     @staticmethod
-    def result_all(jobs: list[Job], **kwargs: dict[str, Any]) -> list[JobResult]:
+    def result_all(jobs: list[Job]) -> list[JobResult]:
         """
         Waits for multiple jobs to complete and returns their results.
         """
@@ -237,7 +237,7 @@ class JobDescription:
     """
 
     description: str | None = None
-    """A description of the job for progress updates. Unused by PBS."""
+    """A description of the job. Unused by PBS."""
 
     commands: list[str | list[str]] = field(default_factory=list)
     """A list of commands to be executed in the job."""
