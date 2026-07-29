@@ -1,8 +1,8 @@
 """
 Core PBS operations: qsub submission, qstat polling, and result file reading.
 
-These functions are called directly by LocalBackend (in-process) and by the
-server daemon when handling pickled requests from ServerBackend clients.
+These functions are used by :class:`pbspy.LocalBackend` and are also available
+to applications that need lower-level PBS state queries.
 """
 
 from __future__ import annotations
@@ -98,12 +98,11 @@ def pbs_wait_for_jobs(
     """
     Poll qstat until all jobs in *jobs* have finished.
 
-    Args:
-        jobs: The jobs to wait for.
-        on_update: Optional callback invoked on each status change.
-            Called as ``on_update(job_id, state)`` where *state* is one of
-            ``"Q"``, ``"R"``, ``"E"``, ``"F"`` or ``None`` when the job has
-            disappeared from qstat (finished).
+    :param jobs: The jobs to wait for.
+    :param on_update: Optional callback invoked on each status change. Called
+        as ``on_update(job_id, state)`` where *state* is one of ``"Q"``,
+        ``"R"``, ``"E"``, ``"F"`` or ``None`` when the job has disappeared
+        from qstat (finished).
     """
     task_done = [False] * len(jobs)
     last_check = time.time() - _POLL_INTERVAL_SECONDS  # poll immediately on first iteration

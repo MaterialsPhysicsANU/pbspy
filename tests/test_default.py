@@ -1,11 +1,10 @@
-import pickle
 import shutil
 import subprocess
 from collections.abc import Callable
 
 import pytest
 
-from pbspy import Backend, Job, JobDescription, JobResult, LocalBackend, ServerBackend
+from pbspy import Backend, Job, JobDescription, JobResult, LocalBackend
 
 
 @pytest.mark.skipif(shutil.which("qsub") is None, reason="qsub not available")
@@ -51,8 +50,7 @@ class _MockBackend(Backend):
     ) -> None:
         self.waited.append(list(jobs))
 
-    def get_result(self, job: object) -> object:
-        assert isinstance(job, Job)
+    def get_result(self, job: Job) -> JobResult:
         return self.results.get(job.job_id, JobResult(exit_code=None))
 
     def delete(self, job_ids: list[str]) -> None:
@@ -105,6 +103,11 @@ def test_mock_backend_result_all() -> None:
     assert results[1].output == "B\n"
 
 
+def test_result_all_accepts_legacy_positional_progress() -> None:
+    """Existing consumers may still pass the removed progress flag positionally."""
+    assert Job.result_all([], False) == []
+
+
 def test_script_generation_unchanged() -> None:
     """script() output is unchanged from the original implementation."""
     jd = JobDescription(
@@ -130,48 +133,19 @@ def test_script_generation_unchanged() -> None:
 
 
 def test_backend_classes_importable() -> None:
-    """Backend, LocalBackend, ServerBackend are importable from pbspy."""
+    """Backend and LocalBackend are importable from pbspy."""
     assert issubclass(LocalBackend, Backend)
-    assert issubclass(ServerBackend, Backend)
 
 
-def test_job_pickle_round_trip() -> None:
-    """Job pickle round-trip excludes backend and restores all other fields.
+def test_default_submissions_share_local_backend(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Default submissions share a backend so wait_all can group their polling."""
+    submitted = iter([("1.mock", "job_a"), ("2.mock", "job_b")])
+    monkeypatch.setattr(LocalBackend, "submit", lambda *_args, **_kwargs: next(submitted))
 
-    Regression test: Job.backend carries live sockets (ServerBackend) and
-    must not be pickled.  See __getstate__/__setstate__ on Job.
-    """
-    job = Job(
-        job_id="42.mock",
-        job_name="my_job",
-        description="some description",
-        backend=LocalBackend(),
-    )
+    job_a = JobDescription(name="job_a").submit()
+    job_b = JobDescription(name="job_b").submit()
 
-    # Pickle and unpickle
-    data = pickle.dumps(job)
-    restored = pickle.loads(data)
-
-    # All non-backend fields preserved
-    assert restored.job_id == "42.mock"
-    assert restored.job_name == "my_job"
-    assert restored.description == "some description"
-    # backend is restored to the default local backend (never pickled)
-    assert isinstance(restored.backend, LocalBackend)
-
-
-def test_job_pickle_excludes_backend_from_state() -> None:
-    """__getstate__ does not include the backend attribute."""
-    job = Job(job_id="1.mock", backend=LocalBackend())
-    state = job.__getstate__()
-    assert "backend" not in state
-    assert state == {
-        "job_name": None,
-        "job_id": "1.mock",
-        "description": None,
-        "output_path": None,
-        "error_path": None,
-    }
+    assert job_a.backend is job_b.backend
 
 
 def test_submit_carries_output_and_error_paths() -> None:
@@ -268,25 +242,6 @@ def test_pbs_get_result_uses_default_paths_when_none() -> None:
     assert "defaultjob.e456" in runner.read_paths
     assert result.output == ""
     assert result.error == ""
-
-
-def test_job_pickle_preserves_output_and_error_paths() -> None:
-    """Job pickle round-trip preserves output_path and error_path."""
-    job = Job(
-        job_id="789.mock",
-        job_name="my_job",
-        output_path="/scratch/project/job.out",
-        error_path="/scratch/project/job.err",
-        backend=LocalBackend(),
-    )
-
-    data = pickle.dumps(job)
-    restored = pickle.loads(data)
-
-    assert restored.output_path == "/scratch/project/job.out"
-    assert restored.error_path == "/scratch/project/job.err"
-    assert restored.job_id == "789.mock"
-    assert restored.job_name == "my_job"
 
 
 # ---------------------------------------------------------------------------

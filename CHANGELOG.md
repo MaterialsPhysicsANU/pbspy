@@ -7,10 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/MaterialsPhysicsANU/pbspy/compare/v0.0.9...HEAD)
 
+### Added
+
+- Add the public `Backend` interface and default `LocalBackend` implementation
+  - `JobDescription.submit()` accepts a backend supplied by the caller
+  - Each `Job` retains its backend for waiting, result retrieval, and cancellation
+- Add `Job.cancel()`
+- Add batched PBS state-query and deletion helpers
+
+### Changed
+
+- Group `Job.wait_all()` and `Job.result_all()` calls by backend so each backend can wait for its jobs together
+- Reuse a shared `LocalBackend` for jobs submitted without an explicit backend
+- Return `None` when PBS has not reported a completed job's exit status
+
+### Fixed
+
+- Preserve `JobDescription.output_path` and `error_path` on submitted jobs and use them when retrieving results
+- Treat cancellation of finished or unknown PBS jobs as successful
+
 ### Removed
 
-- Remove `progress` parameter from the `wait[_all]` and `result[_all]` methods of `Job`
-  - These methods no longer print job IDs or progress
+- Remove progress display from the `Job` wait and result methods
+  - Legacy progress arguments remain accepted and are ignored while consumers migrate
 - Remove `rich` dependency
 
 ## [0.0.9](https://github.com/MaterialsPhysicsANU/pbspy/releases/tag/v0.0.9) - 2026-05-18

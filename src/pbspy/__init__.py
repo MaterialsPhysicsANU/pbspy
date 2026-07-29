@@ -9,7 +9,6 @@ from typing import Any, Self, TypeAlias
 
 from pbspy._backend import Backend
 from pbspy._local_backend import LocalBackend
-from pbspy._server_backend import ServerBackend
 
 # Shared LocalBackend instance so all locally-submitted jobs are grouped together
 # when calling Job.wait_all() / Job.result_all(), restoring concurrent polling.
@@ -23,7 +22,6 @@ __all__ = [
     "QueueLimitsMap",
     "Backend",
     "LocalBackend",
-    "ServerBackend",
     "gadi",
 ]
 
@@ -72,17 +70,6 @@ class Job:
     error_path: str | None = None
     """Custom path for the job's stderr error file (``#PBS -e``), if any."""
 
-    def __getstate__(self) -> dict[str, Any]:
-        """Exclude backend from pickling (it carries live sockets)."""
-        state = self.__dict__.copy()
-        del state["backend"]
-        return state
-
-    def __setstate__(self, state: dict[str, Any]) -> None:
-        """Restore job state, assigning the default local backend."""
-        self.__dict__.update(state)
-        self.backend = _DEFAULT_LOCAL_BACKEND
-
     def wait(self, **kwargs: Any) -> None:
         """
         Wait for the job to complete.
@@ -94,7 +81,7 @@ class Job:
         Waits for the job to complete and returns the result.
         """
         self.wait()
-        return self.backend.get_result(self)  # type: ignore[return-value]
+        return self.backend.get_result(self)
 
     def cancel(self) -> None:
         """Cancel (``qdel``) this job."""
@@ -111,12 +98,15 @@ class Job:
         _wait_all_grouped(jobs)
 
     @staticmethod
-    def result_all(jobs: list[Job], **kwargs: Any) -> list[JobResult]:
+    def result_all(jobs: list[Job], *_args: Any, **_kwargs: Any) -> list[JobResult]:
         """
         Waits for multiple jobs to complete and returns their results.
+
+        Additional arguments are accepted for compatibility with callers that
+        still pass the removed ``progress`` option; they have no effect.
         """
         Job.wait_all(jobs)
-        return [job.backend.get_result(job) for job in jobs]  # type: ignore[misc]
+        return [job.backend.get_result(job) for job in jobs]
 
 
 def _wait_all_grouped(jobs: list[Job]) -> None:
@@ -257,11 +247,9 @@ class JobDescription:
         Args:
             backend: The backend to use for submission.  Defaults to
                 :class:`~pbspy.LocalBackend` (runs ``qsub`` locally).
-                Pass a :class:`~pbspy.ServerBackend` instance to submit via
-                a pbspy-server daemon.
         """
         if backend is None:
-            backend = LocalBackend()
+            backend = _DEFAULT_LOCAL_BACKEND
 
         job_script = self.script()
         job_id, job_name = backend.submit(job_script, self.name)

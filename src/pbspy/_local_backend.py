@@ -1,9 +1,7 @@
 """
 LocalBackend: direct in-process calls to :mod:`pbspy._pbs_core`.
 
-No sockets, no IPC, no serialisation.  This is the default backend when
-running directly on the supercomputer — it behaves identically to the
-original pbspy code but delegates through the :class:`Backend` interface.
+This is the default backend when running on a host with PBS access.
 """
 
 from __future__ import annotations
@@ -15,7 +13,7 @@ import pbspy._pbs_core as core
 from pbspy._backend import Backend
 
 if TYPE_CHECKING:
-    from pbspy import Job
+    from pbspy import Job, JobResult
 
 __all__ = ["LocalBackend"]
 
@@ -40,9 +38,9 @@ class LocalBackend(Backend):
         """Wait for *jobs* to finish."""
         core.pbs_wait_for_jobs(jobs, on_update)
 
-    def get_result(self, job: object) -> object:  # job: Job -> JobResult
+    def get_result(self, job: Job) -> JobResult:
         """Return the :class:`~pbspy.JobResult` for a completed job."""
-        return core.pbs_get_result(job)  # type: ignore[arg-type]
+        return core.pbs_get_result(job)
 
     def delete(self, job_ids: list[str]) -> None:
         """Cancel (``qdel``) the given jobs."""
