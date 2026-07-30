@@ -45,9 +45,7 @@ class _MockBackend(Backend):
         self.results[job_id] = JobResult(exit_code=0, output="mock output\n")
         return job_id, job_name
 
-    def wait(
-        self, jobs: list[Job], on_update: Callable[[str, str | None], None] | None = None, progress: bool = True
-    ) -> None:
+    def wait(self, jobs: list[Job], on_update: Callable[[str, str | None], None] | None = None) -> None:
         self.waited.append(list(jobs))
 
     def get_result(self, job: Job) -> JobResult:
@@ -80,7 +78,7 @@ def test_mock_backend_result() -> None:
     jd.add_command(["echo", "hello"])
     job = jd.submit(backend=mock)
 
-    result = job.result(progress=False)
+    result = job.result()
 
     assert len(mock.waited) == 1
     assert result.exit_code == 0
@@ -96,16 +94,11 @@ def test_mock_backend_result_all() -> None:
     job_a = Job(job_id="1.mock", job_name="job_a", backend=mock)
     job_b = Job(job_id="2.mock", job_name="job_b", backend=mock)
 
-    results = Job.result_all([job_a, job_b], progress=False)
+    results = Job.result_all([job_a, job_b])
 
     assert len(results) == 2
     assert results[0].output == "A\n"
     assert results[1].output == "B\n"
-
-
-def test_result_all_accepts_legacy_positional_progress() -> None:
-    """Existing consumers may still pass the removed progress flag positionally."""
-    assert Job.result_all([], False) == []
 
 
 def test_script_generation_unchanged() -> None:

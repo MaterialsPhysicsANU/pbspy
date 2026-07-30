@@ -70,13 +70,13 @@ class Job:
     error_path: str | None = None
     """Custom path for the job's stderr error file (``#PBS -e``), if any."""
 
-    def wait(self, **kwargs: Any) -> None:
+    def wait(self) -> None:
         """
         Wait for the job to complete.
         """
         self.backend.wait([self])
 
-    def result(self, **kwargs: Any) -> JobResult:
+    def result(self) -> JobResult:
         """
         Waits for the job to complete and returns the result.
         """
@@ -88,7 +88,7 @@ class Job:
         self.backend.delete([self.job_id])
 
     @staticmethod
-    def wait_all(jobs: list[Job], **kwargs: Any) -> None:
+    def wait_all(jobs: list[Job]) -> None:
         """
         Waits for multiple jobs to complete.
         """
@@ -98,12 +98,9 @@ class Job:
         _wait_all_grouped(jobs)
 
     @staticmethod
-    def result_all(jobs: list[Job], *_args: Any, **_kwargs: Any) -> list[JobResult]:
+    def result_all(jobs: list[Job]) -> list[JobResult]:
         """
         Waits for multiple jobs to complete and returns their results.
-
-        Additional arguments are accepted for compatibility with callers that
-        still pass the removed ``progress`` option; they have no effect.
         """
         Job.wait_all(jobs)
         return [job.backend.get_result(job) for job in jobs]
