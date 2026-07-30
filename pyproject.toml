@@ -21,7 +21,6 @@ license = {text = "MIT License"}
 dependencies = [
 ]
 
-
 [dependency-groups]
 dev = [
     "mypy>=1.14.1",

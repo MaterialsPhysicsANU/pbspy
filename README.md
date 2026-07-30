@@ -12,6 +12,8 @@ See the [documentation](https://MaterialsPhysicsANU.github.io/pbspy/) for more i
 
 ## Example
 
+### Running directly on a supercomputer login-node
+
 ```python
 from pbspy import Job, JobDescription
 
@@ -38,23 +40,12 @@ print("job_a:", result_a.output.strip())
 print("job_b:", result_b.output.strip())
 ```
 
-Output (partially executed):
+### Backends
 
-```text
-✓ 124397435.gadi-pbs job_a
-0:01:15 124397436.gadi-pbs job_b
-```
+PBS operations use `LocalBackend` by default and run on the current host.
+`JobDescription.submit()` also accepts any implementation of the public `Backend`
+interface, allowing alternate execution mechanisms to live in separate packages.
 
-Output (completed):
-
-```text
-✓ 124397435.gadi-pbs job_a
-✓ 124397436.gadi-pbs job_b
-
-job_a: A
-job_b: B
-```
-
-## Licence
+## License
 
 `pbspy` is licensed under the MIT License [LICENSE](./LICENSE) or <http://opensource.org/licenses/MIT>.
