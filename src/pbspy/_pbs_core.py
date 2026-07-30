@@ -247,6 +247,6 @@ def format_job_script(
 {f"#PBS -o {output_path}" if output_path else ""}
 {f"#PBS -e {error_path}" if error_path else ""}
 {"#PBS -l wd" if wd else ""}
-{f"#PBS -W depend=afterok:{":".join(afterok_ids)}" if afterok_ids else ""}
+{f'#PBS -W depend=afterok:{":".join(afterok_ids)}' if afterok_ids else ""}
 {commands_str}
 """
