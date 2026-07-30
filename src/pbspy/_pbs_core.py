@@ -28,7 +28,6 @@ __all__ = [
 ]
 
 _POLL_INTERVAL_SECONDS = 60
-_PROGRESS_REFRESH_SECONDS = 1
 
 
 class PBSRunner:
@@ -105,22 +104,18 @@ def pbs_wait_for_jobs(
         from qstat (finished).
     """
     task_done = [False] * len(jobs)
-    last_check = time.time() - _POLL_INTERVAL_SECONDS  # poll immediately on first iteration
-
     while not all(task_done):
-        time.sleep(_PROGRESS_REFRESH_SECONDS)
-        if time.time() - last_check >= _POLL_INTERVAL_SECONDS:
-            last_check = time.time()
-            for i, job in enumerate(jobs):
-                if task_done[i]:
-                    continue
-                process = subprocess.run(["qstat", job.job_id], capture_output=True)
-                if process.returncode != 0:
-                    output = process.stdout.decode("utf-8")
-                    if job.job_id not in output or "has finished" in process.stderr.decode("utf-8"):
-                        task_done[i] = True
-                        if on_update is not None:
-                            on_update(job.job_id, None)
+        time.sleep(_POLL_INTERVAL_SECONDS)
+        for i, job in enumerate(jobs):
+            if task_done[i]:
+                continue
+            process = subprocess.run(["qstat", job.job_id], capture_output=True)
+            if process.returncode != 0:
+                output = process.stdout.decode("utf-8")
+                if job.job_id not in output or "has finished" in process.stderr.decode("utf-8"):
+                    task_done[i] = True
+                    if on_update is not None:
+                        on_update(job.job_id, None)
 
 
 def pbs_get_states(job_ids: list[str], runner: PBSRunner = _LOCAL_RUNNER) -> dict[str, str | None]:
