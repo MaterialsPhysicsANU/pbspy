@@ -62,6 +62,12 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#pbspy.QueueLimits" title="pbspy.QueueLimits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">QueueLimits</span></code></a></p></td>
 <td><p>Represents the resource limits of a queue.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pbspy._backend.html#pbspy._backend.Backend" title="pbspy._backend.Backend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Backend</span></code></a></p></td>
+<td><p>Abstract base class for PBS operation backends.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pbspy._local_backend.html#pbspy._local_backend.LocalBackend" title="pbspy._local_backend.LocalBackend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LocalBackend</span></code></a></p></td>
+<td><p>Backend that calls PBS commands directly in the current process.</p></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -92,7 +98,7 @@ A job will be rejected if the name is not valid.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.JobDescription.description">
 <span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.JobDescription.description" title="Link to this definition">¶</a></dt>
-<dd><p>A description of the job for progress updates. Unused by PBS.</p>
+<dd><p>A description of the job. Unused by PBS.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -193,8 +199,15 @@ A job will be rejected if the name is not valid.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pbspy.JobDescription.submit">
-<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pbspy.Job" title="pbspy.Job"><span class="pre">pbspy.Job</span></a></span></span><a class="headerlink" href="#pbspy.JobDescription.submit" title="Link to this definition">¶</a></dt>
-<dd><p>Submits the job to the PBS queue using <code class="docutils literal notranslate"><span class="pre">qsub</span></code>.</p>
+<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pbspy._backend.html#pbspy._backend.Backend" title="pbspy._backend.Backend"><span class="pre">pbspy._backend.Backend</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pbspy.Job" title="pbspy.Job"><span class="pre">pbspy.Job</span></a></span></span><a class="headerlink" href="#pbspy.JobDescription.submit" title="Link to this definition">¶</a></dt>
+<dd><p>Submits the job to the PBS queue.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>backend: The backend to use for submission.  Defaults to</dt><dd><p><a class="reference internal" href="#pbspy.LocalBackend" title="pbspy.LocalBackend"><code class="xref py py-class docutils literal notranslate"><span class="pre">LocalBackend</span></code></a> (runs <code class="docutils literal notranslate"><span class="pre">qsub</span></code> locally).</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -218,54 +231,55 @@ A job will be rejected if the name is not valid.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pbspy.Job.description">
 <span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.Job.description" title="Link to this definition">¶</a></dt>
-<dd><p>A description of the job for progress updates. Unused by PBS.</p>
+<dd><p>A description of the job. Unused by PBS.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pbspy.Job.backend">
+<span class="sig-name descname"><span class="pre">backend</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pbspy._backend.html#pbspy._backend.Backend" title="pbspy._backend.Backend"><span class="pre">pbspy._backend.Backend</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'field(...)'</span></span><a class="headerlink" href="#pbspy.Job.backend" title="Link to this definition">¶</a></dt>
+<dd><p>The backend used to submit and track this job.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pbspy.Job.output_path">
+<span class="sig-name descname"><span class="pre">output_path</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.Job.output_path" title="Link to this definition">¶</a></dt>
+<dd><p>Custom path for the job’s stdout output file (<code class="docutils literal notranslate"><span class="pre">#PBS</span> <span class="pre">-o</span></code>), if any.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pbspy.Job.error_path">
+<span class="sig-name descname"><span class="pre">error_path</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.Job.error_path" title="Link to this definition">¶</a></dt>
+<dd><p>Custom path for the job’s stderr error file (<code class="docutils literal notranslate"><span class="pre">#PBS</span> <span class="pre">-e</span></code>), if any.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pbspy.Job.wait">
-<span class="sig-name descname"><span class="pre">wait</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pbspy.Job.wait" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">wait</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pbspy.Job.wait" title="Link to this definition">¶</a></dt>
 <dd><p>Wait for the job to complete.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>progress (bool): Whether or not to print the state of the job and status on exit.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pbspy.Job._result_no_wait">
-<span class="sig-name descname"><span class="pre">_result_no_wait</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pbspy.JobResult" title="pbspy.JobResult"><span class="pre">pbspy.JobResult</span></a></span></span><a class="headerlink" href="#pbspy.Job._result_no_wait" title="Link to this definition">¶</a></dt>
-<dd><p>Return the result of a job without waiting.</p>
-<p>If the job has not completed, this method will raise an error.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pbspy.Job.result">
-<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pbspy.JobResult" title="pbspy.JobResult"><span class="pre">pbspy.JobResult</span></a></span></span><a class="headerlink" href="#pbspy.Job.result" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pbspy.JobResult" title="pbspy.JobResult"><span class="pre">pbspy.JobResult</span></a></span></span><a class="headerlink" href="#pbspy.Job.result" title="Link to this definition">¶</a></dt>
 <dd><p>Waits for the job to complete and returns the result.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>progress (bool): Whether or not to print the state of the job and status on exit.</p>
-</dd>
-</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pbspy.Job.cancel">
+<span class="sig-name descname"><span class="pre">cancel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pbspy.Job.cancel" title="Link to this definition">¶</a></dt>
+<dd><p>Cancel (<code class="docutils literal notranslate"><span class="pre">qdel</span></code>) this job.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pbspy.Job.wait_all">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">wait_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pbspy.Job" title="pbspy.Job"><span class="pre">pbspy.Job</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pbspy.Job.wait_all" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">wait_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pbspy.Job" title="pbspy.Job"><span class="pre">pbspy.Job</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pbspy.Job.wait_all" title="Link to this definition">¶</a></dt>
 <dd><p>Waits for multiple jobs to complete.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>progress (bool): Whether or not to print the state of the job and status on exit.</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pbspy.Job.result_all">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">result_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pbspy.Job" title="pbspy.Job"><span class="pre">pbspy.Job</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pbspy.JobResult" title="pbspy.JobResult"><span class="pre">pbspy.JobResult</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pbspy.Job.result_all" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">result_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pbspy.Job" title="pbspy.Job"><span class="pre">pbspy.Job</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pbspy.JobResult" title="pbspy.JobResult"><span class="pre">pbspy.JobResult</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pbspy.Job.result_all" title="Link to this definition">¶</a></dt>
 <dd><p>Waits for multiple jobs to complete and returns their results.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>progress (bool): Whether or not to print the state of the job and status on exit.</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -329,6 +343,91 @@ A job will be rejected if the name is not valid.</p>
 <dt class="sig sig-object py" id="pbspy.QueueLimitsMap">
 <span class="sig-prename descclassname"><span class="pre">pbspy.</span></span><span class="sig-name descname"><span class="pre">QueueLimitsMap</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">TypeAlias</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#pbspy.QueueLimitsMap" title="Link to this definition">¶</a></dt>
 <dd><p>A map of queue names to queue limits.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pbspy.Backend">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pbspy.</span></span><span class="sig-name descname"><span class="pre">Backend</span></span><a class="headerlink" href="#pbspy.Backend" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Abstract base class for PBS operation backends.</p>
+<p>All methods that touch PBS (qsub, qstat, qdel, and file reading) go through
+a backend so callers can supply a different implementation without changing
+the <a class="reference internal" href="#pbspy.JobDescription" title="pbspy.JobDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">JobDescription</span></code></a> / <a class="reference internal" href="#pbspy.Job" title="pbspy.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a> API.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pbspy.Backend.submit">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">script</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pbspy.Backend.submit" title="Link to this definition">¶</a></dt>
+<dd><p>Submit a PBS job script.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p><code class="docutils literal notranslate"><span class="pre">(job_id,</span> <span class="pre">job_name)</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pbspy.Backend.wait">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">wait</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pbspy.Job" title="pbspy.Job"><span class="pre">pbspy.Job</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_update</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pbspy.Backend.wait" title="Link to this definition">¶</a></dt>
+<dd><p>Wait for <em>jobs</em> to finish.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>jobs</strong> – List of <a class="reference internal" href="#pbspy.Job" title="pbspy.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a> objects.</p></li>
+<li><p><strong>on_update</strong> – Optional callback <code class="docutils literal notranslate"><span class="pre">(job_id,</span> <span class="pre">state)</span></code> on each status
+change. <em>state</em> is <code class="docutils literal notranslate"><span class="pre">None</span></code> when the job has finished.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pbspy.Backend.get_result">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pbspy.Job" title="pbspy.Job"><span class="pre">pbspy.Job</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pbspy.JobResult" title="pbspy.JobResult"><span class="pre">pbspy.JobResult</span></a></span></span><a class="headerlink" href="#pbspy.Backend.get_result" title="Link to this definition">¶</a></dt>
+<dd><p>Return the <a class="reference internal" href="#pbspy.JobResult" title="pbspy.JobResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">JobResult</span></code></a> for a completed job.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pbspy.Backend.delete">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pbspy.Backend.delete" title="Link to this definition">¶</a></dt>
+<dd><p>Cancel (<code class="docutils literal notranslate"><span class="pre">qdel</span></code>) the given jobs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>job_ids</strong> – Job ids to cancel.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pbspy.LocalBackend">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pbspy.</span></span><span class="sig-name descname"><span class="pre">LocalBackend</span></span><a class="headerlink" href="#pbspy.LocalBackend" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pbspy._backend.html#pbspy._backend.Backend" title="pbspy._backend.Backend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pbspy._backend.Backend</span></code></a></p>
+<p>Backend that calls PBS commands directly in the current process.</p>
+<p>This is the default backend; it requires <code class="docutils literal notranslate"><span class="pre">qsub</span></code> and <code class="docutils literal notranslate"><span class="pre">qstat</span></code> to be
+available on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pbspy.LocalBackend.submit">
+<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">script</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pbspy.LocalBackend.submit" title="Link to this definition">¶</a></dt>
+<dd><p>Submit <em>script</em> via <code class="docutils literal notranslate"><span class="pre">qsub</span></code> and return <code class="docutils literal notranslate"><span class="pre">(job_id,</span> <span class="pre">job_name)</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pbspy.LocalBackend.wait">
+<span class="sig-name descname"><span class="pre">wait</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pbspy.Job" title="pbspy.Job"><span class="pre">pbspy.Job</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_update</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pbspy.LocalBackend.wait" title="Link to this definition">¶</a></dt>
+<dd><p>Wait for <em>jobs</em> to finish.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pbspy.LocalBackend.get_result">
+<span class="sig-name descname"><span class="pre">get_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pbspy.Job" title="pbspy.Job"><span class="pre">pbspy.Job</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pbspy.JobResult" title="pbspy.JobResult"><span class="pre">pbspy.JobResult</span></a></span></span><a class="headerlink" href="#pbspy.LocalBackend.get_result" title="Link to this definition">¶</a></dt>
+<dd><p>Return the <a class="reference internal" href="#pbspy.JobResult" title="pbspy.JobResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">JobResult</span></code></a> for a completed job.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pbspy.LocalBackend.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pbspy.LocalBackend.delete" title="Link to this definition">¶</a></dt>
+<dd><p>Cancel (<code class="docutils literal notranslate"><span class="pre">qdel</span></code>) the given jobs.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -398,9 +497,12 @@ A job will be rejected if the name is not valid.</p>
 <li class="toctree-l6"><a class="reference internal" href="#pbspy.Job.job_name"><code class="docutils literal notranslate"><span class="pre">Job.job_name</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#pbspy.Job.job_id"><code class="docutils literal notranslate"><span class="pre">Job.job_id</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#pbspy.Job.description"><code class="docutils literal notranslate"><span class="pre">Job.description</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pbspy.Job.backend"><code class="docutils literal notranslate"><span class="pre">Job.backend</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pbspy.Job.output_path"><code class="docutils literal notranslate"><span class="pre">Job.output_path</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pbspy.Job.error_path"><code class="docutils literal notranslate"><span class="pre">Job.error_path</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#pbspy.Job.wait"><code class="docutils literal notranslate"><span class="pre">Job.wait()</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="#pbspy.Job._result_no_wait"><code class="docutils literal notranslate"><span class="pre">Job._result_no_wait()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#pbspy.Job.result"><code class="docutils literal notranslate"><span class="pre">Job.result()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pbspy.Job.cancel"><code class="docutils literal notranslate"><span class="pre">Job.cancel()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#pbspy.Job.wait_all"><code class="docutils literal notranslate"><span class="pre">Job.wait_all()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#pbspy.Job.result_all"><code class="docutils literal notranslate"><span class="pre">Job.result_all()</span></code></a></li>
 </ul>
@@ -419,6 +521,20 @@ A job will be rejected if the name is not valid.</p>
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="#pbspy.QueueLimitsMap"><code class="docutils literal notranslate"><span class="pre">QueueLimitsMap</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pbspy.Backend"><code class="docutils literal notranslate"><span class="pre">Backend</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#pbspy.Backend.submit"><code class="docutils literal notranslate"><span class="pre">Backend.submit()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pbspy.Backend.wait"><code class="docutils literal notranslate"><span class="pre">Backend.wait()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pbspy.Backend.get_result"><code class="docutils literal notranslate"><span class="pre">Backend.get_result()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pbspy.Backend.delete"><code class="docutils literal notranslate"><span class="pre">Backend.delete()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#pbspy.LocalBackend"><code class="docutils literal notranslate"><span class="pre">LocalBackend</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#pbspy.LocalBackend.submit"><code class="docutils literal notranslate"><span class="pre">LocalBackend.submit()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pbspy.LocalBackend.wait"><code class="docutils literal notranslate"><span class="pre">LocalBackend.wait()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pbspy.LocalBackend.get_result"><code class="docutils literal notranslate"><span class="pre">LocalBackend.get_result()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pbspy.LocalBackend.delete"><code class="docutils literal notranslate"><span class="pre">LocalBackend.delete()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

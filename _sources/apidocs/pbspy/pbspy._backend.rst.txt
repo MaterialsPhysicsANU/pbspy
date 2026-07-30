@@ -1,0 +1,55 @@
+:py:mod:`pbspy._backend`
+========================
+
+.. py:module:: pbspy._backend
+
+.. autodoc2-docstring:: pbspy._backend
+   :allowtitles:
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. list-table::
+   :class: autosummary longtable
+   :align: left
+
+   * - :py:obj:`Backend <pbspy._backend.Backend>`
+     - .. autodoc2-docstring:: pbspy._backend.Backend
+          :summary:
+
+API
+~~~
+
+.. py:class:: Backend
+   :canonical: pbspy._backend.Backend
+
+   Bases: :py:obj:`abc.ABC`
+
+   .. autodoc2-docstring:: pbspy._backend.Backend
+
+   .. py:method:: submit(script: str, name: str | None = None) -> tuple[str, str]
+      :canonical: pbspy._backend.Backend.submit
+      :abstractmethod:
+
+      .. autodoc2-docstring:: pbspy._backend.Backend.submit
+
+   .. py:method:: wait(jobs: list[pbspy.Job], on_update: collections.abc.Callable[[str, str | None], None] | None = None) -> None
+      :canonical: pbspy._backend.Backend.wait
+      :abstractmethod:
+
+      .. autodoc2-docstring:: pbspy._backend.Backend.wait
+
+   .. py:method:: get_result(job: pbspy.Job) -> pbspy.JobResult
+      :canonical: pbspy._backend.Backend.get_result
+      :abstractmethod:
+
+      .. autodoc2-docstring:: pbspy._backend.Backend.get_result
+
+   .. py:method:: delete(job_ids: list[str]) -> None
+      :canonical: pbspy._backend.Backend.delete
+      :abstractmethod:
+
+      .. autodoc2-docstring:: pbspy._backend.Backend.delete

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pbspy._local_backend &#8212; pbspy  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pbspy._local_backend">
+<span id="pbspy-local-backend"></span><h1><a class="reference internal" href="#module-pbspy._local_backend" title="pbspy._local_backend"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pbspy._local_backend</span></code></a><a class="headerlink" href="#module-pbspy._local_backend" title="Link to this heading">¶</a></h1>
+<p>LocalBackend: direct in-process calls to <a class="reference internal" href="pbspy._pbs_core.html#module-pbspy._pbs_core" title="pbspy._pbs_core"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pbspy._pbs_core</span></code></a>.</p>
+<p>This is the default backend when running on a host with PBS access.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pbspy._local_backend.LocalBackend" title="pbspy._local_backend.LocalBackend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LocalBackend</span></code></a></p></td>
+<td><p>Backend that calls PBS commands directly in the current process.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="pbspy._local_backend.LocalBackend">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pbspy._local_backend.</span></span><span class="sig-name descname"><span class="pre">LocalBackend</span></span><a class="headerlink" href="#pbspy._local_backend.LocalBackend" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pbspy._backend.html#pbspy._backend.Backend" title="pbspy._backend.Backend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pbspy._backend.Backend</span></code></a></p>
+<p>Backend that calls PBS commands directly in the current process.</p>
+<p>This is the default backend; it requires <code class="docutils literal notranslate"><span class="pre">qsub</span></code> and <code class="docutils literal notranslate"><span class="pre">qstat</span></code> to be
+available on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pbspy._local_backend.LocalBackend.submit">
+<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">script</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pbspy._local_backend.LocalBackend.submit" title="Link to this definition">¶</a></dt>
+<dd><p>Submit <em>script</em> via <code class="docutils literal notranslate"><span class="pre">qsub</span></code> and return <code class="docutils literal notranslate"><span class="pre">(job_id,</span> <span class="pre">job_name)</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pbspy._local_backend.LocalBackend.wait">
+<span class="sig-name descname"><span class="pre">wait</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pbspy.html#pbspy.Job" title="pbspy.Job"><span class="pre">pbspy.Job</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_update</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pbspy._local_backend.LocalBackend.wait" title="Link to this definition">¶</a></dt>
+<dd><p>Wait for <em>jobs</em> to finish.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pbspy._local_backend.LocalBackend.get_result">
+<span class="sig-name descname"><span class="pre">get_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pbspy.html#pbspy.Job" title="pbspy.Job"><span class="pre">pbspy.Job</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pbspy.html#pbspy.JobResult" title="pbspy.JobResult"><span class="pre">pbspy.JobResult</span></a></span></span><a class="headerlink" href="#pbspy._local_backend.LocalBackend.get_result" title="Link to this definition">¶</a></dt>
+<dd><p>Return the <a class="reference internal" href="pbspy.html#pbspy.JobResult" title="pbspy.JobResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">JobResult</span></code></a> for a completed job.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pbspy._local_backend.LocalBackend.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#pbspy._local_backend.LocalBackend.delete" title="Link to this definition">¶</a></dt>
+<dd><p>Cancel (<code class="docutils literal notranslate"><span class="pre">qdel</span></code>) the given jobs.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">pbspy</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/pbspy/pbspy._local_backend.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
